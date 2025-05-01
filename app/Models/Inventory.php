@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Inventory extends Model
 {
     use HasFactory;
+    public $timestamps = false;
 
     /**
      * The attributes that are mass assignable.
@@ -17,6 +18,7 @@ class Inventory extends Model
     protected $fillable = [
         'product_id',
         'inventory_name',
+        'total_quantity',
     ];
 
     /**
@@ -25,5 +27,15 @@ class Inventory extends Model
     public function product()
     {
         return $this->belongsTo(Product::class);
+    }
+    public function stockItems()
+    {
+        return $this->hasMany(Stocks::class, 'inventory_id');
+    }
+
+    // Accessor for dynamic total quantity
+    public function getTotalQuantityAttribute()
+    {
+        return $this->stockItems->sum('quantity');
     }
 }

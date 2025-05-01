@@ -11,9 +11,9 @@ Route::get('/add_product', function () {
     return view('add_product');
 })->middleware(['auth', 'verified'])->name('add_product');
 
-Route::get('/inventory_tracker', function () {
-    return view('inventory_tracker');
-})->middleware(['auth', 'verified'])->name('inventory_tracker');
+Route::get('/sales_report', function () {
+    return view('sales_report');
+})->middleware(['auth', 'verified'])->name('sales_report');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -28,9 +28,7 @@ Route::middleware('auth')->group(function () {
 
     //Route::get('/inventory-log', [App\Http\Controllers\InventoryController::class, 'showInventoryLog'])->name('inventory_log');
     Route::get('/inventory', [App\Http\Controllers\InventoryController::class, 'index'])->name('inventory_log');
-    Route::get('/inventory/{inventory}', [App\Http\Controllers\InventoryController::class, 'show'])->name('inventories.show');
-    Route::get('/inventory/{inventory}/edit', [App\Http\Controllers\InventoryController::class, 'edit'])->name('inventories.edit');
-    Route::put('/inventory/{inventory}', [App\Http\Controllers\InventoryController::class, 'update'])->name('inventories.update');
+    Route::post('/inventories/{id}/add-stock', [App\Http\Controllers\InventoryController::class, 'addStock'])->name('inventories.addStock');
 });
 
 require __DIR__ . '/auth.php';

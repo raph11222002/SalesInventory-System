@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Stocks;
 use Illuminate\Http\Request;
 use App\Models\Inventory;
 
@@ -9,29 +10,32 @@ class InventoryController extends Controller
 {
     public function index()
     {
-        $inventories = Inventory::latest()->paginate(10);
-        
+        $inventories = Inventory::selectRaw('MIN(id) as id, inventory_name')
+            ->groupBy('inventory_name')
+            ->orderBy('id', 'asc')
+            ->paginate(8);
+
         return view('inventory_log', compact('inventories'));
     }
-    public function show(Inventory $inventory)
-    {
-        return view('inventories.show', compact('inventory'));
-    }
-    public function edit(Inventory $inventory)
-    {
-        return view('inventories.edit', compact('inventory'));
-    }
-    public function update(Request $request, Inventory $inventory)
+
+    public function addStock(Request $request, $inventoryId)
     {
         $request->validate([
-            'inventory_name' => 'required|string|max:255',
+            'quantity' => 'required|integer|min:1',
         ]);
-
-        $inventory->update([
-            'inventory_name' => $request->inventory_name,
+    
+        // Add stock to stock_list
+        Stocks::create([
+            'inventory_id' => $inventoryId,
+            'quantity' => $request->input('quantity'),
         ]);
-
-        return redirect()->route('inventories.index')
-            ->with('success', 'Inventory updated successfully.');
+    
+        // Recalculate total stock
+        $totalQuantity = Stocks::where('inventory_id', $inventoryId)->sum('quantity');
+    
+        // Update inventories table
+        Inventory::where('id', $inventoryId)->update(['total_quantity' => $totalQuantity]);
+    
+        return redirect()->back()->with('success', 'Stock added and total updated successfully!');
     }
 }

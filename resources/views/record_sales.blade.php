@@ -15,6 +15,8 @@
                         New Product</a>
                 </div>
 
+                <div class="border-t border-gray-200 my-4"></div>
+
                 @if (session('success'))
                     <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
                         {{ session('success') }}
@@ -32,7 +34,7 @@
                         @foreach($products as $product)
                             <div class="bg-gray-600 hover:bg-indigo-600 rounded-lg shadow-md p-5">
                                 <div class="relative w-full pt-[56.25%] border rounded-xl overflow-hidden">
-                                    <img class="absolute top-0 left-0 w-full h-full object-cover" src="{{ asset('storage/' . $product->image) }}">
+                                    <img class="absolute top-0 left-0 w-full h-full object-cover" src="{{ asset('storage/' . $product->image_path) }}">
                                 </div>
                                 <h3 class="text-xl font-semibold text-white mb-2">
                                     {{ $product->product_name }}

@@ -30,8 +30,8 @@
                 </div>
 
                 <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('inventory_log')" :active="request()->routeIs('inventory_log')">
-                        {{ __('Inventory Log') }}
+                    <x-nav-link :href="route('consumable_list')" :active="request()->routeIs('consumable_list')">
+                        {{ __('Consumable Items') }}
                     </x-nav-link>
                 </div>
             </div>

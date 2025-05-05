@@ -1,5 +1,5 @@
 <!-- resources/views/modals/stockModal.blade.php -->
-<div id="stockModal-{{ $inventory->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+<div id="stockModal-{{ $consumable->id }}" class="fixed inset-0 z-50 hidden overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="modal-title">
     <div class="flex items-center justify-center min-h-screen px-4 text-center">
         <!-- Background overlay -->
         <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" aria-hidden="true"></div>
@@ -15,11 +15,11 @@
                         </svg>
                     </div>
                     <h3 class="ml-3 text-lg font-semibold text-gray-800" id="modal-title">
-                        Add Stock to <span class="text-indigo-600">{{ $inventory->inventory_name }}</span>
+                        Add Stock to <span class="text-indigo-600">{{ $consumable->consumable_name }}</span>
                     </h3>
                 </div>
 
-                <form method="POST" action="{{ route('inventories.addStock', $inventory->id) }}">
+                <form method="POST" action="{{ route('inventories.addStock', $consumable->id) }}">
                     @csrf
 
                     <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
@@ -30,7 +30,7 @@
                     <div class="mt-6 flex justify-end space-x-3">
                         <button type="button"
                                 class="inline-flex justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100"
-                                onclick="document.getElementById('stockModal-{{ $inventory->id }}').classList.add('hidden')">
+                                onclick="document.getElementById('stockModal-{{ $consumable->id }}').classList.add('hidden')">
                             Cancel
                         </button>
                         <button type="submit"

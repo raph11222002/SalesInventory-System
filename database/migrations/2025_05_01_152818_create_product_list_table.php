@@ -19,7 +19,7 @@ class CreateProductListTable extends Migration
             $table->text('image_path');
             $table->string('product_group');
             $table->string('product_name');
-            $table->decimal('product_price', 8, 2);
+            $table->decimal('product_price', 10, 2);
             $table->timestamps();
         });
     }

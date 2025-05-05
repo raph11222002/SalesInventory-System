@@ -32,10 +32,11 @@ class Product extends Model
     /**
      * Get the inventories associated with the product.
      */
-    public function inventories()
+    public function productConsumableNeeded()
     {
-        return $this->hasMany(Inventory::class, 'product_id');
-    }    
+        return $this->hasMany(ProductConsumable::class, 'product_id');
+    }
+
     public function staff()
     {
         return $this->belongsTo(User::class, 'staff_id');

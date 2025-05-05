@@ -3,14 +3,14 @@
 
         <div class="flex">
             <div class="font-medium text-white">
-                <x-nav-link :href="route('inventory_log')" :active="request()->routeIs('inventory_log')">
-                    {{ __('Inventory Log') }}
+                <x-nav-link :href="route('consumable_list')" :active="request()->routeIs('consumable_list')">
+                    {{ __('Consumable Item List') }}
                 </x-nav-link>
             </div>
 
             <div class="font-medium text-white sm:ms-5">
-                <x-nav-link :href="route('add_product')" :active="request()->routeIs('add_product')">
-                    {{ __('Inventory Outflows') }}
+                <x-nav-link :href="route('add.consumable')" :active="request()->routeIs('add.consumable')">
+                    {{ __('List Consumable Item') }}
                 </x-nav-link>
             </div>
 
@@ -50,15 +50,15 @@
                                 <tr>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Inventory ID
+                                        Consumable ID
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Inventory Name
+                                        Consumable Name
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                        Total Quantity
+                                        Total Stock Left
                                     </th>
                                     <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -67,32 +67,38 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-700">
-                                @forelse ($inventories as $inventory)
+                                @forelse ($consumable_list as $consumable)
                                     <tr class="hover:bg-gray-800 transition-colors duration-150">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                            {{ $inventory->id }}
+                                            {{ $consumable->id }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                            {{ $inventory->inventory_name }}
+                                            {{ $consumable->consumable_name }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                            {{ $inventory->total_quantity }}
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                            {{ $consumable->total_stock_left }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-right">
                                             <div class="flex justify-end">
-                                                <button type="button"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded"
-                                                    onclick="document.getElementById('stockModal-{{ $inventory->id }}').classList.remove('hidden')">
-                                                    <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
-                                                        viewBox="0 0 20 20" fill="currentColor">
-                                                        <path
-                                                            d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                                    </svg>
-                                                    Add Stock
-                                                </button>
+                                                @if ($consumable->stock_in_list_count > 0)
+                                                    <a href="{{ route('view.stocks', $consumable->id) }}"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded">
+                                                        View Stocks
+                                                    </a>
+                                                @else
+                                                    <button type="button"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded"
+                                                        onclick="document.getElementById('stockModal-{{ $consumable->id }}').classList.remove('hidden')">
+                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                            viewBox="0 0 20 20" fill="currentColor">
+                                                            <path
+                                                                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                        </svg>
+                                                        Add Stock
+                                                    </button>
+                                                @endif
 
-
-                                                @include('modals.stockModal', ['inventory' => $inventory])
+                                                @include('modals.stockModal', ['inventory' => $consumable])
                                             </div>
                                         </td>
                                     </tr>
@@ -118,7 +124,7 @@
 
                     <!-- Pagination -->
                     <div class="mt-4">
-                        {{ $inventories->links() }}
+                        {{ $consumable_list->links() }}
                     </div>
                 </div>
             </div>
@@ -126,4 +132,4 @@
     </div>
 </x-app-layout>
 
-<script src="{{ asset('js/add_product.js') }}"></script>
+<script src="{{ asset('js/add_consumable.js') }}"></script>

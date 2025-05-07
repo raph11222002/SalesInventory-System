@@ -13,15 +13,21 @@
                     {{ __('List Consumable Item') }}
                 </x-nav-link>
             </div>
-
-            @if (session('success'))
-                <div class="mb-4 text-green-600 bg-green-100 border border-green-300 p-3 rounded">
-                    {{ session('success') }}
-                </div>
-            @endif
-
         </div>
     </x-slot>
+
+    <!-- Toast Notifications -->
+    <div class="fixed top-4 right-4 z-50 space-y-4">
+        @if(session('success'))
+            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 10000)" x-show="show"
+                class="bg-green-600 text-white text-sm font-medium px-5 py-3 rounded-lg shadow-lg flex items-start gap-4">
+                <span>{{ session('success') }}</span>
+                <button @click="show = false" class="text-white hover:text-gray-300 ml-2 text-lg leading-none">
+                    &times;
+                </button>
+            </div>
+        @endif
+    </div>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -30,7 +36,7 @@
                     <!-- Search row -->
                     <div class="flex items-center mb-6">
                         <div class="relative w-64">
-                            <input type="text" id="search" placeholder="Search inventories..."
+                            <input type="text" id="search" placeholder="Search consumables..."
                                 class="bg-gray-700 text-white rounded-md pl-10 pr-4 py-2 w-full focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"
@@ -112,8 +118,8 @@
                                                         d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                <p class="text-lg font-medium">No inventories found</p>
-                                                <p class="text-sm text-gray-400 mt-1">No inventory records available</p>
+                                                <p class="text-lg font-medium">No consumables found</p>
+                                                <p class="text-sm text-gray-400 mt-1">No consumable records available</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -123,7 +129,7 @@
                     </div>
 
                     <!-- Pagination -->
-                    <div class="mt-4">
+                    <div class="mt-4 ">
                         {{ $consumable_list->links() }}
                     </div>
                 </div>

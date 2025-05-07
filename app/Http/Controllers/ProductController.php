@@ -7,6 +7,7 @@ use App\Models\Product;
 use App\Models\StockInList;
 use App\Models\ConsumableList;
 use App\Models\ProductConsumable;
+use App\Models\ProductWithStock;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
@@ -22,22 +23,25 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
+        $skipConsumables = $request->has('product_consumable_checkbox');
+        $productRequiresStock = $request->has('product_required_stock_checkbox');
+
         // Validate request data
         $validator = Validator::make($request->all(), [
             'image_path' => 'required|image|mimes:jpeg,png,jpg,gif|max:2048',
             'product_group' => 'required|string|max:255',
             'product_name' => 'required|string|max:255',
-            'product_price' => 'required|numeric',
+            'required_stock' => $productRequiresStock ? 'required|integer|min:1' : 'nullable',
 
-            'consumable.*.name' => 'required|exists:consumable_list,id',
-            'consumable.*.quantity_needed' => 'required|integer|min:1',
+            // Only validate consumables if the checkbox is NOT checked
+            'consumable.*.name' => $skipConsumables ? 'nullable' : 'required|exists:consumable_list,id',
+            'consumable.*.quantity_needed' => $skipConsumables ? 'nullable' : 'required|integer|min:1',
+
+            'product_price' => 'required|numeric',
         ], );
 
         if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors()
-            ], 422);
+            return back()->withErrors($validator)->withInput();
         }
 
         try {
@@ -60,34 +64,39 @@ class ProductController extends Controller
                     'updated_at' => now(),
                 ]);
 
-                // Create associated inventory items
-                foreach ($request->consumable as $item) {
-                    $consumable = ConsumableList::find($item['name']);
-                    $consumableName = $consumable ? $consumable->consumable_name : null;
+                if (!$skipConsumables && $request->filled('consumable')) {
+                    foreach ($request->consumable as $item) {
+                        $consumable = ConsumableList::find($item['name']);
+                        $consumableName = $consumable ? $consumable->consumable_name : null;
 
-                    ProductConsumable::create([
+                        ProductConsumable::create([
+                            'product_id' => $product->id,
+                            'product_name' => $product->product_name,
+                            'consumable_id' => $item['name'],
+                            'consumable_name' => $consumableName,
+                            'quantity_needed' => $item['quantity_needed'],
+                            'created_at' => now(),
+                            'updated_at' => now(),
+                        ]);
+                    }
+                }
+
+                if ($productRequiresStock && $request->filled('required_stock')) {
+                    ProductWithStock::create([
                         'product_id' => $product->id,
                         'product_name' => $product->product_name,
-                        'consumable_id' => $item['name'],
-                        'consumable_name' => $consumableName,
-                        'quantity_needed' => $item['quantity_needed'],
+                        'required_stock' => $request->required_stock,
                         'created_at' => now(),
                         'updated_at' => now(),
                     ]);
                 }
 
                 DB::commit();
-
                 return redirect()->route('add_product')->with('success', 'Product added successfully!');
             }
         } catch (\Exception $e) {
             DB::rollBack();
-
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while adding the product',
-                'error' => $e->getMessage()
-            ], 500);
+            return back()->with('error', 'Something went wrong.');
         }
     }
     public function showProducts()
@@ -115,54 +124,57 @@ class ProductController extends Controller
         $request->validate([
             'quantity' => 'required|integer|min:1',
         ]);
-    
+
         $product = Product::findOrFail($id);
         $orderQty = $request->input('quantity');
-    
+
         DB::beginTransaction();
-    
+
         try {
             $consumables = ProductConsumable::where('product_id', $product->id)->get();
-    
+
             foreach ($consumables as $consumable) {
                 $totalToDeduct = $consumable->quantity_needed * $orderQty;
                 $remaining = $totalToDeduct;
-    
+
                 // Deduct from stock_in_list rows FIFO-style
                 $stockRows = StockInList::where('consumable_id', $consumable->consumable_id)
-                                        ->orderBy('id', 'asc')
-                                        ->get();
-    
+                    ->orderBy('id', 'asc')
+                    ->get();
+
                 foreach ($stockRows as $stock) {
-                    if ($remaining <= 0) break;
-    
+                    if ($remaining <= 0)
+                        break;
+
                     $available = $stock->quantity_added;
-    
+
                     // Adjust available based on previous usage if needed
-    
+
                     $deduct = min($available, $remaining);
                     $stock->quantity_added -= $deduct;
                     $stock->save();
-    
+
                     $remaining -= $deduct;
                 }
-    
+
                 if ($remaining > 0) {
-                    throw new \Exception("Not enough stock for {$consumable->consumable_name}");
+                    DB::rollBack();
+                    return back()->with('error', "Not enough stock for {$consumable->consumable_name}");
                 }
-    
-                // Update total_stock_left in ConsumableList
-                $consumableList = ConsumableList::find($consumable->consumable_id);
-                $consumableList->total_stock_left -= $totalToDeduct;
-                $consumableList->save();
+
+                // Recalculate total stock
+                $totalQuantity = StockInList::where('consumable_id', $consumable->consumable_id)->sum('quantity_added');
+
+                // Update inventories table
+                ConsumableList::where('id', $consumable->consumable_id)->update(['total_stock_left' => $totalQuantity]);
             }
-    
+
             DB::commit();
-    
+
             return back()->with('success', 'Order submitted and stocks deducted.');
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->withErrors(['error' => $e->getMessage()]);
+            return back()->with('error', 'Something went wrong.');
         }
     }
 }

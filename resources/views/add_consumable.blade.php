@@ -32,7 +32,8 @@
                             <div class="flex-1">
                                 <label class="block text-sm font-medium text-gray-300 mb-1">Consumable Name
                                     <span class="text-red-500">*</span></label>
-                                <input type="text" name="consumable[${currentIndex}][name]" required
+                                <input type="text" name="consumable[${currentIndex}][name]" required autocomplete="off"
+                                    value="{{ old('consumable[${currentIndex}][name]') }}" placeholder="Cup (12oz)"
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300">
                             </div>
 
@@ -63,6 +64,10 @@
                                 {{ session('success') }}
                                 <button type="button" onclick="this.parentElement.style.display='none'"
                                     class="absolute top-2 right-2 text-xl leading-none">&times;</button>
+
+                                <a href="{{ route('add_product') }}" class="underline text-blue-600 hover:text-blue-700">
+                                    Add Product Now.
+                                </a>
                             </div>
                         </div>
                     @endif

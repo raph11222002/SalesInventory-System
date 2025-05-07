@@ -11,8 +11,8 @@ document.addEventListener('DOMContentLoaded', function () {
         <div class="flex-1">
             <label class="block text-sm font-medium text-gray-300 mb-1">Consumable Name [${currentIndex + 1}]
                 <span class="text-red-500">*</span></label>
-            <input type="text" name="consumable[${currentIndex}][name]" required
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300">
+            <input type="text" name="consumable[${currentIndex}][name]" placeholder="Cup (12oz)" autocomplete="off" 
+                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300" required>
         </div>
 
         <button type="button"

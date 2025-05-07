@@ -7,7 +7,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/add-consumable', function () {
+Route::get('/consumable-list/add-consumable', function () {
     return view('add_consumable');
 })->middleware(['auth', 'verified'])->name('add.consumable');
 

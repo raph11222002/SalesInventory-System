@@ -16,18 +16,7 @@
         </div>
     </x-slot>
 
-    <!-- Toast Notifications -->
-    <div class="fixed top-4 right-4 z-50 space-y-4">
-        @if(session('success'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 10000)" x-show="show"
-                class="bg-green-600 text-white text-sm font-medium px-5 py-3 rounded-lg shadow-lg flex items-start gap-4">
-                <span>{{ session('success') }}</span>
-                <button @click="show = false" class="text-white hover:text-gray-300 ml-2 text-lg leading-none">
-                    &times;
-                </button>
-            </div>
-        @endif
-    </div>
+    @include('components.toast')
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">

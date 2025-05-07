@@ -82,7 +82,7 @@ class ConsumableController extends Controller
         $totalQuantity = StockInList::where('consumable_id', $consumableId)->sum('quantity_added');
 
         // Update inventories table
-        ConsumableList::where('id', $consumableId)->update(['total_stock_left' => $totalQuantity]);    
+        ConsumableList::where('id', $consumableId)->update(['total_stock_left' => $totalQuantity]);
 
         return redirect()->back()->with('success', 'Stock added and total updated successfully!');
     }

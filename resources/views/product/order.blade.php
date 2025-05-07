@@ -17,29 +17,7 @@
         </div>
     </x-slot>
 
-    <!-- Toast Notifications -->
-    <div class="fixed top-4 right-4 z-50 space-y-4">
-
-        @if(session('success'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 10000)" x-show="show"
-                class="bg-green-600 text-white text-sm font-medium px-5 py-3 rounded-lg shadow-lg flex items-start gap-4">
-                <span>{{ session('success') }}</span>
-                <button @click="show = false" class="text-white hover:text-gray-300 ml-2 text-lg leading-none">
-                    &times;
-                </button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div x-data="{ show: true }" x-init="setTimeout(() => show = false, 10000)" x-show="show"
-                class="bg-red-600 text-white text-sm font-medium px-5 py-3 rounded-lg shadow-lg flex items-start gap-4">
-                <span>{{ session('error') }}</span>
-                <button @click="show = false" class="text-white hover:text-gray-300 ml-2 text-lg leading-none">
-                    &times;
-                </button>
-            </div>
-        @endif
-    </div>
+    @include('components.toast')
 
     <div class="max-w-xl mx-auto mt-10 bg-gray-800 p-6 rounded shadow">
         <h2 class="text-white text-2xl font-bold mb-4">{{ $product->product_name }}</h2>

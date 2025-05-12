@@ -59,11 +59,13 @@ class ConsumableController extends Controller
     public function showConsumables()
     {
         $consumable_list = ConsumableList::withCount('stockInList')
-            ->orderBy('consumable_name', 'asc')
+            ->orderByRaw('total_stock_left < 5 desc') // put low-stock first
+            ->orderBy('consumable_name', 'asc') // then sort by name
             ->paginate(8);
 
         return view('consumable_list', compact('consumable_list'));
     }
+
 
     public function addStock(Request $request, $consumableId)
     {
@@ -87,12 +89,11 @@ class ConsumableController extends Controller
         return redirect()->back()->with('success', 'Stock added and total updated successfully!');
     }
     // In ConsumableController.php
-    public function viewStocks($consumableId)
+    public function viewConsumableStocks($consumableId)
     {
         $consumable = ConsumableList::findOrFail($consumableId);
         $stocks = $consumable->stockInList()->orderBy('id')->paginate(10);
 
-        return view('view_stocks', compact('consumable', 'stocks'));
+        return view('view_stocks_consumable', compact('consumable', 'stocks'));
     }
-
 }

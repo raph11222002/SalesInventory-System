@@ -13,12 +13,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ===== CHECKBOX TOGGLE =====
     initializeConsumableCheckboxToggle();
-    initializeProductStockRequiredToggle();
-
-    initializeStockCounter();
 
     initializeAddConsumableItemButton();
 });
+
+const noConsumableCheckbox = document.getElementById('product-consumable-checkbox');
+const requiredStockCheckbox = document.getElementById('product-required-stock-checkbox');
+const warningMsg = document.getElementById('warning-msg');
+
+function validateCheckboxes() {
+    if (noConsumableCheckbox.checked && !requiredStockCheckbox.checked) {
+        warningMsg.classList.remove('hidden');
+        // Optional: Auto-correct or disable form submission
+        requiredStockCheckbox.checked = true;
+    } else {
+        warningMsg.classList.add('hidden');
+    }
+}
+
+noConsumableCheckbox.addEventListener('change', validateCheckboxes);
+requiredStockCheckbox.addEventListener('change', validateCheckboxes);
 
 // Image preview and handling functionality
 function initializeImageHandling() {
@@ -538,52 +552,6 @@ function initializeConsumableCheckboxToggle() {
     });
 
     toggleConsumableSection(checkbox.checked); // Initial run
-}
-
-function initializeProductStockRequiredToggle() {
-    const checkbox = document.getElementById('product-required-stock-checkbox');
-    const decrementBtn = document.querySelector('.stock-decrement');
-    const incrementBtn = document.querySelector('.stock-increment');
-    const stockInput = document.querySelector('input[name="required_stock"]');
-
-    function updateStockControlsState() {
-        const isChecked = checkbox.checked;
-
-        [decrementBtn, incrementBtn, stockInput].forEach(el => {
-            if (el) {
-                el.disabled = !isChecked;
-                el.classList.toggle('opacity-50', !isChecked);
-                el.classList.toggle('cursor-not-allowed', !isChecked);
-            }
-        });
-    }
-
-    checkbox.addEventListener('change', updateStockControlsState);
-
-    // Initial state setup on page load
-    updateStockControlsState();
-}
-
-function initializeStockCounter() {
-    const decrementBtn = document.querySelector('.stock-decrement');
-    const incrementBtn = document.querySelector('.stock-increment');
-    const stockInput = document.querySelector('input[name="required_stock"]');
-
-    if (!decrementBtn || !incrementBtn || !stockInput) return;
-
-    decrementBtn.addEventListener('click', () => {
-        if (stockInput.disabled) return;
-        let currentValue = parseInt(stockInput.value) || 1;
-        if (currentValue > 1) {
-            stockInput.value = currentValue - 1;
-        }
-    });
-
-    incrementBtn.addEventListener('click', () => {
-        if (stockInput.disabled) return;
-        let currentValue = parseInt(stockInput.value) || 1;
-        stockInput.value = currentValue + 1;
-    });
 }
 
 function initializeAddConsumableItemButton() {

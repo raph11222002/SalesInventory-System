@@ -20,11 +20,14 @@
 
     <script src="//unpkg.com/alpinejs" defer></script>
 
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js']) <!-- Alpine.js imported here -->
 </head>
 
-<body class="font-sans antialiased bg-white">
+<body class="font-sans antialiased bg-gray-300">
     <div>
         @include('layouts.navigation')
 

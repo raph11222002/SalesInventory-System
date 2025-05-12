@@ -11,7 +11,7 @@ class ConsumableList extends Model
 
     protected $table = 'consumable_list';
 
-    protected $fillable = ['consumable_name', 'total_stock_left'];
+    protected $fillable = ['consumable_name'];
 
     public function stockInList()
     {

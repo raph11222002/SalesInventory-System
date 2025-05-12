@@ -11,13 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('product_with_stock_list', function (Blueprint $table) {
+        Schema::create('product_stock_in_list', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('product_list')->onDelete('cascade');
-            $table->string('product_name');
-            $table->integer('required_stock')->default('0');
+            $table->integer('quantity_added');
+            $table->date('date_received');
             $table->timestamps();
-        });
+        });        
     }
 
     /**
@@ -25,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('product_with_stock_list');
+        Schema::dropIfExists('product_stock_in_list');
     }
 };

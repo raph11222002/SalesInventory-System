@@ -2,9 +2,19 @@
 
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-white leading-tight">
-            {{ __('Add Product') }}
-        </h2>
+        <div class="flex">
+            <div class="font-medium text-white">
+                <x-nav-link :href="route('add_product')" :active="request()->routeIs('add_product')">
+                    {{ __('Add Product') }}
+                </x-nav-link>
+            </div>
+
+            <div class="font-medium text-white sm:ms-5">
+                <x-nav-link :href="route('product.stock.view')" :active="request()->routeIs('product.stock.view')">
+                    {{ __('Product Stock List') }}
+                </x-nav-link>
+            </div>
+        </div>
     </x-slot>
 
     @include('components.toast')
@@ -41,7 +51,7 @@
                     </div>
 
                     <!-- Product Info -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-2">
                         <div>
                             <label class="block text-sm font-medium text-gray-300">Product Group
                                 <span class="text-red-500">*</span></label>
@@ -50,23 +60,21 @@
                                 value="{{ old('product_group') }}" placeholder="Noodles" autocomplete="off">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-300">Product Name
+                            <label class="block text-sm font-medium text-gray-300">Product Name & Size
                                 <span class="text-red-500">*</span></label>
                             <input type="text" name="product_name" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
                                 value="{{ old('product_name') }}" placeholder="Samyang (spicy)" autocomplete="off">
                         </div>
 
-                        <div class="mb-2">
+                        <div>
                             <input id="product-consumable-checkbox" name="product_consumable_checkbox" type="checkbox"
                                 value=""
                                 class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
                             <label for="product-consumable-checkbox" class="ms-2 text-sm font-medium text-gray-300">This
                                 product has no consumable item.</label>
                         </div>
-
-                        <div>
-                            <div class="mb-2">
+                            <div>
                                 <input id="product-required-stock-checkbox" name="product_required_stock_checkbox"
                                     type="checkbox" value=""
                                     class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
@@ -75,42 +83,9 @@
                                     product
                                     required stock.</label>
                             </div>
-
-                            <!-- Quantity Input -->
-                            <div class="relative flex items-center w-[11rem]">
-                                <!-- Decrement Button -->
-                                <button type="button"
-                                    class="stock-decrement bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 border-gray-600 hover:bg-gray-200 border rounded-s-lg p-3 h-11 focus:ring-blue-300 focus:ring-2 focus:outline-none">
-                                    <svg class="w-3 h-3 text-gray-900 dark:text-white"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 2">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                            stroke-width="2" d="M1 1h16" />
-                                    </svg>
-                                </button>
-
-                                <!-- Quantity Input -->
-                                <input type="text" name="required_stock" value="1" min="1"
-                                    class="stock-required bg-gray-50 border-x-0 h-11 font-medium text-center text-gray-900 text-sm focus:ring-blue-300 block w-full pb-6 border-gray-600 placeholder-gray-400 focus:border-blue-300"
-                                    required>
-
-                                <!-- Label -->
-                                <div
-                                    class="absolute bottom-1 start-1/2 -translate-x-1/2 flex items-center text-xs text-gray-900">
-                                    <span>Stocks</span>
-                                </div>
-
-                                <!-- Increment Button -->
-                                <button type="button"
-                                    class="stock-increment bg-gray-100 dark:bg-gray-700 dark:hover:bg-gray-600 border-gray-600 hover:bg-gray-200 border rounded-e-lg p-3 h-11 focus:ring-blue-300 focus:ring-2 focus:outline-none">
-                                    <svg class="w-3 h-3 text-gray-900 dark:text-white"
-                                        xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 18">
-                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
-                                            stroke-width="2" d="M9 1v16M1 9h16" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
                     </div>
+
+                    <p id="warning-msg" class="text-red-400 text-sm italic hidden">(You cannot check the 'no consumable item' and uncheck the 'required stock' at the same time.)</p>
 
                     @php
                         $isConsumableListEmpty = $consumable_list->groupBy('consumable_name')->sortBy('consumable_name')->isEmpty();
@@ -225,7 +200,6 @@
                             {{ $isConsumableListEmpty ? 'disabled' : '' }}>
                             <i class="fas fa-plus mr-1"></i> Add Consumable Item
                         </button>
-
                     </div>
 
                     <div class="grid gap-6 mb-6 md:grid-cols-2 mt-8">

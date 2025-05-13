@@ -41,7 +41,7 @@
                 </div>
 
                 <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('admin.register.staff')" :active="request()->routeIs('admin.register.staff')">
+                    <x-nav-link :href="route('show.register.staff')" :active="request()->routeIs('show.register.staff')">
                         {{ __('Register Staff') }}
                     </x-nav-link>
                 </div>

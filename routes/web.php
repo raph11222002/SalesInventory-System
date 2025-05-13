@@ -44,7 +44,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/orders/view/{id}', [App\Http\Controllers\OrderController::class, 'viewOrder'])->name('orders.view');
     Route::get('/orders/filter', [App\Http\Controllers\OrderController::class, 'filterOrders'])->name('orders.filter');
 
-    Route::get('/register-staff', function () {return view('auth.register_staff');})->name('admin.register.staff');
+    Route::get('/register-staff', [App\Http\Controllers\StaffController::class, 'showStaffRegister'])->name('show.register.staff');
+    Route::post('/register-staff/store', [App\Http\Controllers\StaffController::class, 'store'])->name('admin.register.staff');
+    Route::post('/login-staff', [App\Http\Controllers\StaffController::class, 'login'])->name('staff.login');
+    Route::post('/logout-staff', [App\Http\Controllers\StaffController::class, 'logout'])->name('staff.logout');
 });
 
 require __DIR__ . '/auth.php';

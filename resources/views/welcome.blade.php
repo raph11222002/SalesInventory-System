@@ -24,7 +24,7 @@
         @if (Route::has('login'))
             <nav class="flex items-center justify-end gap-4">
                 @auth
-                    <a href="{{ url('/record-sales') }}"
+                    <a href="{{ url('/dashboard') }}"
                         class="inline-block px-5 py-1.5 text-[#EDEDEC] border-[#19140035] hover:border-[#1915014a] border-[#3E3E3A] hover:border-[#62605b] rounded-sm text-sm leading-normal">
                         Record Sales
                     </a>
@@ -67,17 +67,19 @@
                                     </svg>
                                 </div>
                                 <h2 class="text-2xl font-bold mb-6 text-center text-gray-800">Staff Login</h2>
-                                <form method="POST" action="" class="space-y-4">
+                                <form method="POST" action="{{ route('staff.login') }}" class="space-y-4">
                                     @csrf
                                     <div>
                                         <label class="block text-gray-700 text-sm font-bold mb-2">Username</label>
                                         <input type="text" name="username"
                                             class="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                                        <x-input-error :messages="$errors->get('username')" class="mt-2" />
                                     </div>
                                     <div>
                                         <label class="block text-gray-700 text-sm font-bold mb-2">Password</label>
                                         <input type="password" name="password"
                                             class="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300">
+                                        <x-input-error :messages="$errors->get('password')" class="mt-2" />
                                     </div>
                                     <button type="submit"
                                         class="w-full bg-blue-500 text-white py-3 rounded-lg hover:bg-blue-600 transition duration-300 transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
@@ -118,7 +120,6 @@
                                         <x-input-error :messages="$errors->get('password')" class="mt-2" />
                                     </div>
 
-                                    <!-- Remember Me -->
                                     <div class="flex mt-4 justify-between">
                                         @if (Route::has('password.request'))
                                             <a class="underline text-sm text-gray-700 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-800"
@@ -128,9 +129,9 @@
                                         @endif
 
                                         <a class="underline text-sm text-gray-700 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-800"
-                                                href="{{ route('register') }}">
-                                                {{ __("Register Admin") }}
-                                            </a>
+                                            href="{{ route('register') }}">
+                                            {{ __("Register Admin") }}
+                                        </a>
                                     </div>
 
                                     <div class="flex items-center justify-end mt-4">

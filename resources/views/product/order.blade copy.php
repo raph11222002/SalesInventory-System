@@ -19,7 +19,7 @@
 
     @include('components.toast')
 
-    <div class="max-w-7xl mx-auto mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
+    <div class="max-w-7xl mx-auto mt-10 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
         <!-- Left: Order Form -->
         <div class="bg-gray-800 p-6 rounded shadow">
             <div class="flex justify-between">
@@ -52,14 +52,16 @@
             </p>
 
             <!-- Order Form -->
-            <form id="orderForm" action="{{ route('order.add-to-order', $product->id) }}" method="POST">
+            <form id="orderForm" action="{{ route('product.order.submit', [
+    'id' => $product->id,
+    'product_group' => $product->product_group,
+    'product_name' => $product->product_name,
+    'product_price' => $product->product_price
+]) }}" method="POST">
                 @csrf
-                <input type="hidden" name="product_name" value="{{ $product->product_name }}">
-                <input type="hidden" name="product_price" value="{{ $product->product_price }}">
-
                 <label class="block text-white mb-2" for="quantity">Enter quantity ordered:</label>
 
-                <input type="number" name="quantity" id="quantity" min="1" autocomplete="off" required
+                <input type="number" name="quantity" id="quantity" min="1" required
                     class="w-full px-3 py-2 rounded bg-gray-700 text-white border border-gray-600 mb-4">
 
                 <div class="flex justify-between items-center">
@@ -70,25 +72,82 @@
                     <input type="hidden" name="amount" id="amount">
                     <input type="hidden" name="payment_method" id="payment_method_hidden">
 
-                    <button type="submit" id="proceedBtn" disabled
+                    <button type="button" id="proceedBtn" disabled
+                        onclick="document.getElementById('confirmationModal').classList.remove('hidden')"
                         class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded opacity-50 cursor-not-allowed">
                         Add to Order
                     </button>
                 </div>
-
-                <div id="orderButtonWrapper">
-                </div>
             </form>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 mb-10">
+        <!-- Modal -->
+        <div id="confirmationModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden overflow-y-auto">
+            <div class="flex justify-center min-h-screen px-4">
+                <div class="bg-white rounded-lg p-6 w-full max-w-md">
+                    <h3 class="text-lg font-semibold mb-4">Confirm Order</h3>
+
+                    <div class="border-t border-gray-900 my-4"></div>
+
+                    <p class="mb-4">Product Name: <strong>{{ $product->product_name }}</strong></p>
+
+                    <div class="mt-6">
+                        <table class="min-w-full text-left text-gray-700 border-t pt-4">
+                            <thead>
+                                <tr class="text-sm text-gray-700 uppercase tracking-wider border-b border-gray-900">
+                                    <th class="px-4 py-2">Quantity</th>
+                                    <th class="px-4 py-2">Price</th>
+                                    <th class="px-4 py-2">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="px-4 py-2 font-bold"><span id="modalQuantity"></span></td>
+                                    <td class="px-4 py-2 font-bold">₱{{ $product->product_price }}</td>
+                                    <td class="px-4 py-2 font-bold">₱<span id="modalAmount"></span>.00</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Payment Method Toggle -->
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                        <div class="flex space-x-4">
+                            <!-- Cash Option -->
+                            <label class="flex items-center">
+                                <input type="radio" id="cash" name="payment_method" value="Cash"
+                                    class="form-radio h-4 w-4 text-blue-500" checked>
+                                <span class="ml-2">Cash</span>
+                            </label>
+                            <!-- Gcash Option -->
+                            <label class="flex items-center">
+                                <input type="radio" id="gcash" name="payment_method" value="Gcash"
+                                    class="form-radio h-4 w-4 text-blue-500">
+                                <span class="ml-2">Gcash</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="document.getElementById('confirmationModal').classList.add('hidden')"
+                            class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded">Cancel</button>
+                        <button onclick="submitOrderForm()"
+                            class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded">Confirm</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Stock & Consumables -->
+        <div class="grid grid-cols-1 gap-4">
             <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
                 <h1 class="text-white text-2xl font-bold">Product Stock</h1>
 
                 <div class="border-t border-gray-200 my-4"></div>
 
                 <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-900">
+                    <thead>
                         <tr>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -102,16 +161,12 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         @forelse ($product_with_stock_list as $product_stock)
-                            <tr
-                                class="bg-gray-800 transition-colors duration-150 {{ $product_stock->required_stock <= 5 ? 'bg-red-900/40' : '' }}">
+                            <tr class="hover:bg-gray-800 transition-colors duration-150">
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                     {{ $product_stock->product_name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                     {{ $product_stock->required_stock }}
-                                    @if ($product_stock->required_stock <= 5)
-                                        <span class="ml-2 text-red-400 text-xs">(Low)</span>
-                                    @endif
                                 </td>
                             </tr>
                         @empty
@@ -134,20 +189,13 @@
             </div>
 
             <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-                <div class="flex justify-between">
-                    <h1 class="text-white text-2xl font-bold">Consumable Stock</h1>
-
-                    <!-- Pagination -->
-                    <div class="rounded-lg">
-                        {{ $consumable_list->links() }}
-                    </div>
-                </div>
+                <h1 class="text-white text-2xl font-bold">Consumable Stock</h1>
 
                 <div class="border-t border-gray-200 my-4"></div>
 
 
                 <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-900">
+                    <thead>
                         <tr>
                             <th scope="col"
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -161,16 +209,12 @@
                     </thead>
                     <tbody class="divide-y divide-gray-700">
                         @forelse ($consumable_list as $consumable)
-                            <tr class="bg-gray-800 transition-colors duration-150 {{ $consumable->total_stock_left <= 5 ? 'bg-red-900/40' : '' }}"">
-                                                                        <td class=" px-6 py-4 whitespace-nowrap text-sm
-                                text-white font-medium">
-                                {{ $consumable->consumable_name }}
+                            <tr class="hover:bg-gray-800 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                    {{ $consumable->consumable_name }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                     {{ $consumable->total_stock_left }}
-                                    @if ($consumable->total_stock_left <= 5)
-                                        <span class="ml-2 text-red-400 text-xs">(Low)</span>
-                                    @endif
                                 </td>
                                 </td>
                             </tr>
@@ -200,7 +244,7 @@
         <script>
             const quantityInput = document.getElementById('quantity');
             const amountInput = document.getElementById('amount');
-            /*
+            // Auto-fill modal quantity when opening
             document.querySelector('[onclick*="confirmationModal"]').addEventListener('click', function () {
                 const quantity = quantityInput.value;
                 const amount = amountInput.value;
@@ -208,65 +252,25 @@
                 document.getElementById('modalQuantity').innerText = quantity || 0;
                 document.getElementById('modalAmount').innerText = amount || 0;
             });
-            */
 
             const proceedBtn = document.getElementById('proceedBtn');
 
             const productPrice = {{ $product->product_price }};
             const totalAmountDisplay = document.getElementById('totalAmountDisplay');
 
-            const productStocks = @json($product_with_stock_list);
-            const productConsumables = @json($product->productConsumableNeeded);
-            const consumableStocks = @json($consumable_list->items());
-
-            // Make sure the parent wrapper exists
-            const buttonWrapper = document.getElementById('orderButtonWrapper');
-
-            const warningsContainer = document.createElement('div');
-            warningsContainer.id = 'warningsContainer';
-            warningsContainer.className = 'mt-2 text-sm text-red-300';
-            buttonWrapper.appendChild(warningsContainer);
-
             quantityInput.addEventListener('input', () => {
                 const quantity = parseInt(quantityInput.value) || 0;
                 const total = quantity * productPrice;
+
                 totalAmountDisplay.textContent = `₱${total.toLocaleString('en-PH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                 amountInput.value = total;
 
-                let stockIssues = [];
-
-                // Check Product Stocks
-                productStocks.forEach(stock => {
-                    const required = stock.required_stock;
-                    const needed = quantity; // 1 product = 1 stock
-                    if (required < needed) {
-                        stockIssues.push(`Insufficient product stock for "${stock.product_name}". Required: ${needed}, Available: ${required}`);
-                    }
-                });
-
-                // Check Consumable Stocks
-                productConsumables.forEach(consumable => {
-                    const totalRequired = consumable.quantity_needed * quantity;
-                    const stock = consumableStocks.find(c => c.id === consumable.consumable_id);
-
-                    if (stock && stock.total_stock_left < totalRequired) {
-                        stockIssues.push(`Insufficient consumable stock for "${stock.consumable_name}". Required: ${totalRequired}, Available: ${stock.total_stock_left}`);
-                    }
-                });
-
-                // Update warning message
-                if (stockIssues.length > 0) {
-                    proceedBtn.disabled = true;
-                    proceedBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    warningsContainer.innerHTML = stockIssues.map(w => `<div>⚠️ ${w}</div>`).join('');
-                } else if (quantity > 0) {
+                if (quantityInput.value && parseInt(quantityInput.value) > 0) {
                     proceedBtn.disabled = false;
                     proceedBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                    warningsContainer.innerHTML = '';
                 } else {
                     proceedBtn.disabled = true;
                     proceedBtn.classList.add('opacity-50', 'cursor-not-allowed');
-                    warningsContainer.innerHTML = '';
                 }
             });
 

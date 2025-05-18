@@ -9,7 +9,7 @@
 
             <div class="font-medium text-white sm:ms-5">
                 <x-nav-link :href="route('product.stock.view')" :active="request()->routeIs('product.stock.view')">
-                    {{ __('Product Stock List') }}
+                    {{ __('Product List') }}
                 </x-nav-link>
             </div>
         </div>
@@ -54,6 +54,11 @@
                                         Total Stock Left
                                     </th>
                                     <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Status
+                                    </th>
+
+                                    <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Actions
                                     </th>
@@ -62,7 +67,7 @@
                             <tbody class="divide-y divide-gray-700">
                                 @forelse ($product_with_stock_list as $product_stock)
                                     <tr
-                                        class="hover:bg-gray-800 transition-colors duration-150 {{ $product_stock->required_stock < 5 ? 'bg-red-900/40' : '' }}">
+                                        class="hover:bg-gray-800 transition-colors duration-150 {{ $product_stock->required_stock <= 5 ? 'bg-red-900/40' : '' }} {{ ($product_stock->is_active ?? 'available') === 'unavailable' ? 'opacity-60 bg-gray-800' : '' }}">
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                             {{ $product_stock->product_id }}
@@ -71,32 +76,92 @@
                                             {{ $product_stock->product_name }}
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                            {{ $product_stock->required_stock }}
-                                            @if ($product_stock->required_stock < 5)
-                                                <span class="ml-2 text-red-400 text-xs">(Low)</span>
+                                            @if($product_stock->requires_stock)
+                                                {{ $product_stock->required_stock }}
+                                                @if ($product_stock->required_stock <= 5)
+                                                    <span class="ml-2 text-red-400 text-xs">(Low)</span>
+                                                @endif
+                                            @else
+                                                <span class="text-gray-400">Product doesn't require stock</span>
+                                            @endif
+                                        </td>
+
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            @if (isset($product_stock->is_active))
+                                                <span
+                                                    class="{{ $product_stock->is_active === 'available' ? 'text-green-400' : 'text-gray-400' }}">
+                                                    {{ ucfirst($product_stock->is_active) }}
+                                                </span>
+                                            @else
+                                                <span class="text-red-400">Unknown</span>
                                             @endif
                                         </td>
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-right">
                                             <div class="flex justify-end">
-                                                @if ($product_stock->product_stock_in_list_count > 0)
-                                                    <a href="{{ route('view.product.stocks', $product_stock->product_id) }}"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded">
-                                                        View Stocks
-                                                    </a>
-                                                @else
-                                                    <button type="button"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded"
-                                                        onclick="document.getElementById('stockModal-{{ $product_stock->product_id }}').classList.remove('hidden')">
-                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 20 20" fill="currentColor">
-                                                            <path
-                                                                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                                                        </svg>
-                                                        Add Stock
-                                                    </button>
-                                                    @include('modals.productStockModal', $product_stock)
+                                                @if ($product_stock->requires_stock)
+
+                                                    @if (($product_stock->is_active ?? 'available') === 'unavailable')
+                                                        @if ($product_stock->product_stock_in_list_count > 0)
+                                                            <button type="button"
+                                                                class="inline-flex items-center px-3 py-1.5 bg-gray-700 text-gray-400 text-sm font-medium rounded cursor-not-allowed"
+                                                                disabled>
+                                                                View Stocks
+                                                            </button>
+                                                        @else
+                                                            <button type="button"
+                                                                class="inline-flex items-center px-3 py-1.5 bg-gray-700 text-gray-400 text-sm font-medium rounded cursor-not-allowed"
+                                                                disabled>
+                                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path
+                                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                                </svg>
+                                                                Add Stock
+                                                            </button>
+                                                        @endif
+                                                    @else
+                                                        {{-- If available: normal buttons --}}
+                                                        @if ($product_stock->product_stock_in_list_count > 0)
+                                                            <a href="{{ route('view.product.stocks', $product_stock->product_id) }}"
+                                                                class="inline-flex items-center px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded">
+                                                                View Stocks
+                                                            </a>
+                                                        @else
+                                                            <button type="button"
+                                                                class="inline-flex items-center px-3 py-1.5 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded"
+                                                                onclick="document.getElementById('stockModal-{{ $product_stock->product_id }}').classList.remove('hidden')">
+                                                                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
+                                                                    viewBox="0 0 20 20" fill="currentColor">
+                                                                    <path
+                                                                        d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                                </svg>
+                                                                Add Stock
+                                                            </button>
+                                                            @include('modals.productStockModal', $product_stock)
+                                                        @endif
+                                                    @endif
                                                 @endif
+
+
+                                                <form method="POST"
+                                                    action="{{ route('product.toggle.status', $product_stock->product_id) }}"
+                                                    class="ml-2">
+                                                    @csrf
+                                                    @method('PATCH')
+                                                    @if (($product_stock->is_active ?? 'available') === 'available')
+                                                        <button type="submit"
+                                                            class="inline-flex items-center px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded">
+                                                            Mark as Unavailable
+                                                        </button>
+                                                    @else
+                                                        <button type="submit"
+                                                            class="inline-flex items-center px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded"
+                                                            style="opacity: 1; position: relative; z-index: 10;">
+                                                            Mark as Available
+                                                        </button>
+                                                    @endif
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

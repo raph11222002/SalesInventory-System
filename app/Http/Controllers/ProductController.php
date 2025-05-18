@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Orders;
+use App\Models\OrderItems;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\StockInList;
@@ -57,7 +58,7 @@ class ProductController extends Controller
 
                 // Create product
                 $product = Product::create([
-                    'staff_id' => Auth::id(),
+                    'admin_id' => Auth::guard('web')->id(),
                     'image_path' => $path,
                     'product_group' => $request->product_group,
                     'product_name' => $request->product_name,
@@ -102,10 +103,23 @@ class ProductController extends Controller
     }
     public function showProducts()
     {
+        $data = [];
+
+        if (Auth::guard('web')->check()) {
+            $data['user'] = Auth::guard('web')->user();
+            // handle web user
+        } elseif (Auth::guard('staff')->check()) {
+            $data['staff'] = Auth::guard('staff')->user();
+            // handle staff user
+        } else {
+            // optional: redirect to login or abort
+            return redirect()->route('welcome'); // or custom logic
+        }
+
         $products = Product::with('productConsumableNeeded')->get();
         $groupedProducts = $products->groupBy('product_group');
 
-        return view('record_sales', compact('groupedProducts'));
+        return view('record_sales', compact('data', 'groupedProducts'));
     }
     public function showAddProduct()
     {
@@ -115,21 +129,100 @@ class ProductController extends Controller
 
         return view('add_product', compact('consumable_list'));
     }
+    public function toggleStatus($id)
+    {
+        DB::table('product_list')->where('id', $id)->update([
+            'is_active' => DB::raw("IF(is_active = 'available', 'unavailable', 'available')")
+        ]);
+
+        return redirect()->back()->with('success', 'Product availability updated successfully.');
+    }
+
     public function showProductWithStock()
     {
-        $product_with_stock_list = ProductWithStockList::withCount('productStockInList')
-            ->orderByRaw('required_stock < 5 desc') // put low-stock first
-            ->orderBy('product_name', 'asc')
-            ->paginate(8);
+        $perPage = 8;
+        $currentPage = request()->get('page', 1);
 
-        return view('product_stock_list', compact('product_with_stock_list'));
+        // Step 1: Get all products from product_list
+        $allProducts = DB::table('product_list')
+            ->select('id', 'product_name', 'is_active')
+            ->orderBy('product_name', 'asc')
+            ->get();
+
+        // Step 2: Get product IDs that require stock
+        $stockProductIds = ProductWithStockList::pluck('product_id')->toArray();
+
+        // Step 3: Products WITH stock requirement
+        $productsWithStock = ProductWithStockList::withCount('productStockInList')
+            ->whereIn('product_id', $stockProductIds)
+            ->get()
+            ->map(function ($item) use ($allProducts) {
+                $product = $allProducts->firstWhere('id', $item->product_id);
+                return (object) [
+                    'product_id' => $item->product_id,
+                    'product_name' => $product->product_name ?? 'Unknown',
+                    'is_active' => $product->is_active ?? 'unavailable',
+                    'product_stock_in_list_count' => $item->product_stock_in_list_count,
+                    'required_stock' => $item->required_stock,
+                    'requires_stock' => true,
+                ];
+            });
+
+        // Step 4: Products WITHOUT stock requirement
+        $productsWithoutStock = $allProducts->filter(function ($product) use ($stockProductIds) {
+            return !in_array($product->id, $stockProductIds);
+        })->map(function ($product) {
+            return (object) [
+                'product_id' => $product->id,
+                'product_name' => $product->product_name,
+                'is_active' => $product->is_active ?? 'unavailable',
+                'product_stock_in_list_count' => 0,
+                'required_stock' => "Doesn't require stock",
+                'requires_stock' => false,
+            ];
+        });
+
+        // Step 5: Merge and sort
+        $mergedProducts = $productsWithStock->merge($productsWithoutStock)->sortBy('product_name')->values();
+
+        // Step 6: Paginate manually
+        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+            $mergedProducts->forPage($currentPage, $perPage),
+            $mergedProducts->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+
+        return view('product_list', ['product_with_stock_list' => $paginated]);
     }
+
     public function viewProductStocks($productId)
     {
         $product_stock = ProductWithStockList::where('product_id', $productId)->firstOrFail();
-        $stocks = $product_stock->productStockInList()->orderBy('id')->paginate(10);
+        $stocks = $product_stock->productStockInList()
+            ->where('is_active', 1)  // show only active stocks
+            ->orderBy('id')
+            ->paginate(10);
 
         return view('view_stocks_product', compact('product_stock', 'stocks'));
+    }
+    public function removeStocks($stockId, $productId)
+    {
+        // Update all stocks of this product to set is_active = 0
+        ProductStockInList::where('id', $stockId)
+            ->where('is_active', 1)
+            ->update(['is_active' => 0]);
+
+        $totalQuantity = ProductStockInList::where('product_id', $productId)
+            ->where('is_active', 1)
+            ->sum('quantity_added');
+
+        // Update
+        ProductWithStockList::where('product_id', $productId)->update(['required_stock' => $totalQuantity]);
+
+        // Optionally redirect back with success message
+        return redirect()->back()->with('success', 'Stocks marked as inactive.');
     }
     public function productAddStock(Request $request, $productId)
     {
@@ -139,148 +232,20 @@ class ProductController extends Controller
 
         // Add stock to stock_list
         ProductStockInList::create([
+            'admin_id' => Auth::guard('web')->id(),
             'product_id' => $productId,
             'quantity_added' => $request->input('quantity'),
             'date_received' => now(),
         ]);
 
         // Recalculate total stock
-        $totalQuantity = ProductStockInList::where('product_id', $productId)->sum('quantity_added');
+        $totalQuantity = ProductStockInList::where('product_id', $productId)
+            ->where('is_active', 1)
+            ->sum('quantity_added');
 
         // Update
         ProductWithStockList::where('product_id', $productId)->update(['required_stock' => $totalQuantity]);
 
         return redirect()->back()->with('success', 'Stock added and total updated successfully!');
-    }
-
-
-    public function orderForm($id)
-    {
-        $product = Product::with('productConsumableNeeded')->findOrFail($id);
-
-        $product_with_stock_list = ProductWithStockList::withCount('productStockInList')
-            ->where('product_id', $id)
-            ->get();
-
-        $consumableIds = $product->productConsumableNeeded->pluck('consumable_id');
-
-        $consumable_list = ConsumableList::withCount('stockInList')
-            ->whereIn('id', $consumableIds)
-            ->orderBy('consumable_name', 'asc')
-            ->paginate(5);
-
-        return view('product.order', [
-            'product' => $product,
-            'product_with_stock_list' => $product_with_stock_list,
-            'consumable_list' => $consumable_list
-        ]);
-    }
-    public function submitOrder(Request $request, $id, $product_group, $product_name, $product_price)
-    {
-        $request->validate([
-            'quantity' => 'required|integer|min:1',
-            'amount' => 'required|numeric',
-            'payment_method' => 'required|in:Cash,Gcash',
-        ]);
-
-        $product = Product::findOrFail($id);
-        $orderQty = $request->input('quantity');
-
-
-        DB::beginTransaction();
-
-        try {
-            $consumables = ProductConsumable::where('product_id', $product->id)->get();
-            $product_with_stock = ProductWithStockList::where('product_id', $product->id)->get();
-
-            if ($consumables->isNotEmpty()) {
-                foreach ($consumables as $consumable) {
-                    $totalToDeduct = $consumable->quantity_needed * $orderQty;
-                    $remaining = $totalToDeduct;
-
-                    // Deduct from stock_in_list rows FIFO-style
-                    $stockRows = StockInList::where('consumable_id', $consumable->consumable_id)
-                        ->orderBy('id', 'asc')
-                        ->get();
-
-                    foreach ($stockRows as $stock) {
-                        if ($remaining <= 0)
-                            break;
-
-                        $available = $stock->quantity_added;
-
-                        // Adjust available based on previous usage if needed
-                        $deduct = min($available, $remaining);
-                        $stock->quantity_added -= $deduct;
-                        $stock->save();
-
-                        $remaining -= $deduct;
-                    }
-
-                    if ($remaining > 0) {
-                        DB::rollBack();
-                        return back()->with('error', "Not enough stock for {$consumable->consumable_name}");
-                    }
-
-                    // Recalculate total stock
-                    $totalQuantity = StockInList::where('consumable_id', $consumable->consumable_id)->sum('quantity_added');
-
-                    // Update inventories table
-                    ConsumableList::where('id', $consumable->consumable_id)->update(['total_stock_left' => $totalQuantity]);
-                }
-            }
-
-            if ($product_with_stock->isNotEmpty()) {
-                //$totalToDeduct = $orderQty;
-                $remaining = $orderQty;
-
-                $stockRows = ProductStockInList::where('product_id', $product->id)
-                    ->orderBy('id', 'asc')
-                    ->get();
-
-                foreach ($stockRows as $stock) {
-                    if ($remaining <= 0)
-                        break;
-
-                    $available = $stock->quantity_added;
-                    $deduct = min($available, $remaining);
-
-                    $stock->quantity_added -= $deduct;
-                    $stock->save();
-
-                    $remaining -= $deduct;
-                }
-
-                if ($remaining > 0) {
-                    DB::rollBack();
-                    return back()->with('error', "Not enough product stock for {$product->product_name}");
-                }
-
-                $totalQuantity = ProductStockInList::where('product_id', $product->id)->sum('quantity_added');
-
-                ProductWithStockList::where('product_id', $product->id)
-                    ->update(['required_stock' => $totalQuantity]);
-            }
-
-            Orders::create([
-                'staff_id' => Auth::id(),
-                'product_id' => $id,
-                'product_group' => $product_group,
-                'product_name' => $product_name,
-                'quantity_ordered' => $orderQty,
-                'product_price' => $product_price,
-                'amount' => $request->input('amount'),
-                'payment_method' => $request->input('payment_method'),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-
-            DB::commit();
-
-            return back()->with('success', 'Order submitted and stocks deducted.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return back()->with('error', 'Something went wrong.');
-        }
     }
 }

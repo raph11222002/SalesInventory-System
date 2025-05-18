@@ -5,16 +5,18 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                        <img src="{{ asset('storage/logo/459728249_122100422882523340_4977492472467994671_n-removebg-preview.png') }}" alt="Logo"
-                    class="h-16 w-16">
+                    <img src="{{ asset('storage/logo/459728249_122100422882523340_4977492472467994671_n-removebg-preview.png') }}"
+                        alt="Logo" class="h-16 w-16">
                 </div>
 
                 <!-- Navigation Links -->
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('show.dashboard')" :active="request()->routeIs('show.dashboard')">
-                        {{ __('Dashboard') }}
-                    </x-nav-link>
-                </div>
+                @auth('web')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('show.dashboard')" :active="request()->routeIs('show.dashboard')">
+                            {{ __('Dashboard') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('record_sales')" :active="request()->routeIs('record_sales')">
@@ -22,11 +24,13 @@
                     </x-nav-link>
                 </div>
 
-                <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('add_product')" :active="request()->routeIs('add_product') || request()->routeIs('product.stock.view')">
-                        {{ __('Add Product') }}
-                    </x-nav-link>
-                </div>
+                @auth('web')
+                    <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('add_product')" :active="request()->routeIs('add_product') || request()->routeIs('product.stock.view')">
+                            {{ __('Add Product') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
 
                 <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('sales_report')" :active="request()->routeIs('sales_report')">
@@ -34,17 +38,22 @@
                     </x-nav-link>
                 </div>
 
-                <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('consumable_list')" :active="request()->routeIs('consumable_list') || request()->routeIs('add.consumable')">
-                        {{ __('Consumable Items') }}
-                    </x-nav-link>
-                </div>
+                @auth('web')
+                    <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('consumable_list')" :active="request()->routeIs('consumable_list') || request()->routeIs('add.consumable')">
+                            {{ __('Consumable Items') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
 
-                <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('show.register.staff')" :active="request()->routeIs('show.register.staff')">
-                        {{ __('Register Staff') }}
-                    </x-nav-link>
-                </div>
+                @auth('web')
+                    <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('show.register.staff')"
+                            :active="request()->routeIs('show.register.staff')">
+                            {{ __('Register Staff') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
             </div>
 
             <!-- Settings Dropdown -->
@@ -53,7 +62,11 @@
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-400 bg-gray-800 hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div>{{ Auth::user()->name }}</div>
+                            @auth('web')
+                                <div>{{ Auth::guard('web')->user()->name }}</div>
+                            @elseauth('staff')
+                                <div>{{ Auth::guard('staff')->user()->name }}</div>
+                            @endauth
 
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg"
@@ -72,14 +85,25 @@
                         </x-dropdown-link>
 
                         <!-- Authentication -->
-                        <form method="POST" action="{{ route('logout') }}">
-                            @csrf
+                        @auth('web')
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
 
-                            <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                this.closest('form').submit();">
-                                {{ __('Log Out') }}
-                            </x-dropdown-link>
-                        </form>
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
+                                                            this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        @elseauth('staff')
+                            <form method="POST" action="{{ route('staff.logout') }}">
+                                @csrf
+
+                                <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
+                                                            this.closest('form').submit();">
+                                    {{ __('Log Out') }}
+                                </x-dropdown-link>
+                            </form>
+                        @endauth
                     </x-slot>
                 </x-dropdown>
             </div>
@@ -111,8 +135,12 @@
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-gray-600">
             <div class="px-4">
-                <div class="font-medium text-base text-gray-200">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
+                @auth('web')
+                    <div class="font-medium text-base text-gray-200">{{ Auth::guard('web')->user()->name }}</div>
+                    <div class="font-medium text-sm text-gray-500">{{ Auth::guard('web')->user()->email }}</div>
+                @elseauth('staff')
+                    <div class="font-medium text-base text-gray-200">{{ Auth::guard('staff')->name }}</div>
+                @endauth
             </div>
 
             <div class="mt-3 space-y-1">

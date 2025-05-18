@@ -14,21 +14,32 @@ class AuthenticatedSessionController extends Controller
     /**
      * Display the login view.
      */
-    public function create(): View
-    {
-        return view('welcome');
-    }
 
     /**
      * Handle an incoming authentication request.
      */
+    public function login(Request $request)
+    {
+        $credentials = $request->validate([
+            'username' => 'required|string',
+            'password' => 'required',
+        ]);
+
+        // Authentication logic (e.g., using Auth facade)
+        if (Auth::guard('staff')->attempt($credentials)) {
+            return redirect()->route('show.dashboard');
+        }
+
+        // If login fails
+        return back()->with('login_error', 'Invalid username or password.');
+    }
     public function store(LoginRequest $request): RedirectResponse
     {
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('show.dashboard', absolute: false));
+        return redirect()->route('show.dashboard');
     }
 
     /**

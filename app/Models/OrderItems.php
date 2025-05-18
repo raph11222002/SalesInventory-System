@@ -5,25 +5,27 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Orders extends Model
+class OrderItems extends Model
 {
     use HasFactory;
 
-    protected $table = 'orders';
+    protected $table = 'order_items';
 
     protected $fillable = [
-        'staff_id',
-        'total_amount',
-        'payment_method',
+        'order_id',
+        'product_id',
+        'quantity',
+        'product_price',
+        'amount',
     ];
 
     // Relationship: belongs to a consumable
-    public function products()
+    public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
     }
-    public function items()
+    public function order()
     {
-        return $this->hasMany(OrderItems::class, 'order_id');
+        return $this->belongsTo(Orders::class, 'order_id');
     }
 }

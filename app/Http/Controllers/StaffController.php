@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use Illuminate\View\View;
+use Illuminate\Support\Facades\Hash;
 
 class StaffController extends Controller
 {
@@ -18,7 +19,9 @@ class StaffController extends Controller
      */
     public function showStaffRegister(): View
     {
-        return view('auth.register_staff');
+        $staffs = Staff::where('admin_id', Auth::guard('web')->id())->get();
+
+        return view('auth.register_staff', compact('staffs'));
     }
 
     /**
@@ -38,7 +41,7 @@ class StaffController extends Controller
             'admin_id' => Auth::id(),
             'name' => $request->name,
             'username' => $request->username,
-            'password' => $request->password,
+            'password' => Hash::make($request->password),
         ]);
 
         event(new Registered($staff));
@@ -57,7 +60,11 @@ class StaffController extends Controller
         if (Auth::guard('staff')->attempt($credentials)) {
             $request->session()->regenerate();
 
-            return redirect()->route('show.dashboard'); 
+            logger('Login success:', [Auth::guard('staff')->user()]);
+
+            return redirect()->route('record_sales');
+        } else {
+            logger('Login failed for', $credentials);
         }
 
         return back()->withErrors([
@@ -67,6 +74,7 @@ class StaffController extends Controller
     public function logout()
     {
         Auth::guard('staff')->logout();
+        
         return redirect('/');
     }
 }

@@ -22,7 +22,7 @@ class Product extends Model
      * @var array
      */
     protected $fillable = [
-        'staff_id',
+        'admin_id',
         'image_path',
         'product_group',
         'product_name',
@@ -40,5 +40,9 @@ class Product extends Model
     public function staff()
     {
         return $this->belongsTo(User::class, 'staff_id');
+    }
+    public function orderItems()
+    {
+        return $this->hasMany(OrderItems::class, 'product_id');
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Orders;
+use App\Models\OrderItems;
 use App\Models\ConsumableList;
 use App\Models\ProductWithStockList;
 
@@ -35,17 +36,26 @@ class DashboardController extends Controller
         $orders = Orders::whereBetween('created_at', [$startDate, $endDate])->get();
 
         // Total Sales (sum of 'amount' column)
-        $totalSales = $orders->sum('amount');
+        $totalSales = $orders->sum('total_amount');
 
         // Total Quantity Ordered
-        $totalOrders = $orders->sum('quantity_ordered');
+        $totalOrders = $orders->count();
 
         // Product Performance: sum of amount per product_name
-        $productPerformance = Orders::select('product_name', DB::raw('SUM(amount) as revenue'))
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->groupBy('product_name')
-            ->orderBy('revenue', 'desc')
-            ->get();
+        $productPerformance = OrderItems::with(['product', 'order'])
+            ->whereHas('order', function ($query) use ($startDate, $endDate) {
+                $query->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->get()
+            ->groupBy('product.product_name')
+            ->map(function ($items, $productName) {
+                return [
+                    'product_name' => $productName,
+                    'revenue' => $items->sum('order.total_amount'),
+                ];
+            })
+            ->sortByDesc('revenue')
+            ->values();
 
         // Properly use the models with pagination (6 items per page)
         $productWithStock = ProductWithStockList::orderBy('required_stock', 'asc')->paginate(6);

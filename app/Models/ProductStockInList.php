@@ -12,6 +12,7 @@ class ProductStockInList extends Model
     protected $table = 'product_stock_in_list';
 
     protected $fillable = [
+        'admin_id',
         'product_id',
         'quantity_added',
         'date_received',

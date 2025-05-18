@@ -45,14 +45,14 @@
                     </div>
 
                     <button type="button" id="add-consumable-item"
-                        class="mt-3 text-white bg-green-600 hover:bg-green-700 px-4 py-2 rounded-md text-sm">
+                        class="mt-3 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm">
                         <i class="fas fa-plus mr-1"></i> Add Consumable Item
                     </button>
 
                     <!-- Submit Button -->
                     <div class="text-right mt-8">
                         <button type="submit" id="submitButton"
-                            class="inline-flex items-center px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+                            class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
                             <i class="fas fa-save mr-2"></i>List Consumables
                         </button>
                     </div>

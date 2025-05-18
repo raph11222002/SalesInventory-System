@@ -11,10 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('consumable_list', function (Blueprint $table) {
+        Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('consumable_name');
-            $table->string('total_stock_left')->default('0');
+            $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
+            $table->decimal('total_amount', 10, 2)->default('0');
+            $table->string('payment_method');
+            $table->integer('is_active')->default('1');
             $table->timestamps();
         });
     }
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('consumable_list');
+        Schema::dropIfExists('orders');
     }
 };

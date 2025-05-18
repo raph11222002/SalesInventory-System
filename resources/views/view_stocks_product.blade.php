@@ -50,6 +50,10 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                     Date Received
                                 </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700">
@@ -64,6 +68,22 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                         {{ \Carbon\Carbon::parse($stock->date_received)->format('Y-m-d') }}
                                     </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        <div class="flex justify-end">
+                                            <form method="POST"
+                                                action="{{ route('product.remove.stocks', [$stock->id, $product_stock->product_id]) }}"
+                                                class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="inline-flex items-center px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-sm font-medium rounded">
+                                                    Remove
+                                                </button>
+                                            </form>
+
+                                        </div>
+                                    </td>
+                                    </a>
                                 </tr>
                             @endforeach
                         </tbody>

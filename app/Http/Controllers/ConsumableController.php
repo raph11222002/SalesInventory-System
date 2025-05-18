@@ -48,6 +48,7 @@ class ConsumableController extends Controller
         // Insert new consumables
         foreach ($request->consumable as $item) {
             ConsumableList::create([
+                'admin_id' => Auth::guard('web')->id(),
                 'consumable_name' => $item['name'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -75,6 +76,7 @@ class ConsumableController extends Controller
 
         // Add stock to stock_list
         StockInList::create([
+            'admin_id' => Auth::guard('web')->id(),
             'consumable_id' => $consumableId,
             'quantity_added' => $request->input('quantity'),
             'date_received' => now(),

@@ -23,8 +23,8 @@
                 <!-- Email Address -->
                 <div class="mt-4">
                     <x-input-label for="username" :value="__('Username')" />
-                    <x-text-input id="username" class="block mt-1 w-full" type="text" name="username" :value="old('username')"
-                        required autocomplete="username" />
+                    <x-text-input id="username" class="block mt-1 w-full" type="text" name="username"
+                        :value="old('username')" required autocomplete="username" />
                     <x-input-error :messages="$errors->get('username')" class="mt-2" />
                 </div>
 
@@ -77,28 +77,34 @@
                             Username
                         </th>
                         <th scope="col"
-                            class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Password
+                            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Actions
                         </th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
-                    <tr class="hover:bg-gray-800 transition-colors duration-150">
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-
-                        </td>
-
-                    </tr>
+                    @forelse($staffs as $staff)
+                        <tr class="hover:bg-gray-800 transition-colors duration-150">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                {{ $staff->id }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                {{ $staff->name }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                {{ $staff->username }}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="4" class="px-6 py-4 text-center text-gray-400">No staff found.</td>
+                        </tr>
+                    @endforelse
                 </tbody>
+
             </table>
         </div>
     </div>

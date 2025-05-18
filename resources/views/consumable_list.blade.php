@@ -63,7 +63,7 @@
                             <tbody class="divide-y divide-gray-700">
                                 @forelse ($consumable_list as $consumable)
                                     <tr
-                                        class="hover:bg-gray-800 transition-colors duration-150 {{ $consumable->total_stock_left < 5 ? 'bg-red-900/40' : '' }}">
+                                        class="hover:bg-gray-800 transition-colors duration-150 {{ $consumable->total_stock_left <= 5 ? 'bg-red-900/40' : '' }}">
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
                                             {{ $consumable->id }}
@@ -73,7 +73,7 @@
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                             {{ $consumable->total_stock_left }}
-                                            @if ($consumable->total_stock_left < 5)
+                                            @if ($consumable->total_stock_left <= 5)
                                                 <span class="ml-2 text-red-400 text-xs">(Low)</span>
                                             @endif
                                         </td>

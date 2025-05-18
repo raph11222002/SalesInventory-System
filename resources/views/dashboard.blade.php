@@ -133,11 +133,11 @@
                                 @foreach ($productPerformance as $product)
                                     <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-150">
                                         <td class="px-4 py-3 text-sm font-medium text-gray-900 dark:text-white rounded-l-lg">
-                                            {{ $product->product_name }}
+                                            {{ $loop->iteration }}. {{ $product['product_name'] }}
                                         </td>
                                         <td
                                             class="px-4 py-3 text-sm text-right font-semibold text-gray-900 dark:text-white rounded-r-lg">
-                                            ₱{{ number_format($product->revenue, 2) }}</td>
+                                            ₱{{ number_format($product['revenue'], 2) }}</td>
                                     </tr>
                                 @endforeach
                             </tbody>

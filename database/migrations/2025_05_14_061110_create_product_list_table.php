@@ -15,11 +15,12 @@ class CreateProductListTable extends Migration
     {
         Schema::create('product_list', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('staff_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
             $table->text('image_path');
             $table->string('product_group');
             $table->string('product_name');
             $table->decimal('product_price', 10, 2);
+            $table->string('is_active')->default('available');
             $table->timestamps();
         });
     }

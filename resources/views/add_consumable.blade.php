@@ -38,21 +38,25 @@
                             </div>
 
                             <button type="button"
-                                class="remove-item text-white bg-red-600 hover:bg-red-700 px-4 py-2.5 rounded-md text-sm mt-2 md:mt-0">
-                                <i class="fas fa-trash mr-1"></i> Remove
+                                class="remove-item bg-red-500 hover:bg-red-600 px-3 py-2.5 rounded-md text-sm mt-2 md:mt-0 border-none hover:opacity-75">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white" fill="none"
+                                    viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M6 18L18 6M6 6l12 12" />
+                                </svg>
                             </button>
                         </div>
                     </div>
 
                     <button type="button" id="add-consumable-item"
-                        class="mt-3 text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm">
+                        class="mt-3 text-white bg-gray-500 hover:bg-gray-600 px-4 py-2 rounded-md text-sm">
                         <i class="fas fa-plus mr-1"></i> Add Consumable Item
                     </button>
 
                     <!-- Submit Button -->
                     <div class="text-right mt-8">
                         <button type="submit" id="submitButton"
-                            class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                            class="inline-flex items-center px-6 py-2 bg-green-500 hover:bg-green-600 text-white rounded-md">
                             <i class="fas fa-save mr-2"></i>List Consumables
                         </button>
                     </div>

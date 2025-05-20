@@ -11,7 +11,7 @@
 
             <div class="font-medium text-white sm:ms-5">
                 <x-nav-link :href="route('product.stock.view')" :active="request()->routeIs('product.stock.view')">
-                    {{ __('Product Stock List') }}
+                    {{ __('Product List') }}
                 </x-nav-link>
             </div>
         </div>
@@ -74,18 +74,19 @@
                             <label for="product-consumable-checkbox" class="ms-2 text-sm font-medium text-gray-300">This
                                 product has no consumable item.</label>
                         </div>
-                            <div>
-                                <input id="product-required-stock-checkbox" name="product_required_stock_checkbox"
-                                    type="checkbox" value=""
-                                    class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
-                                <label for="product-required-stock-checkbox"
-                                    class="ms-2 text-sm font-medium text-gray-300">This
-                                    product
-                                    required stock.</label>
-                            </div>
+                        <div>
+                            <input id="product-required-stock-checkbox" name="product_required_stock_checkbox"
+                                type="checkbox" value=""
+                                class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
+                            <label for="product-required-stock-checkbox"
+                                class="ms-2 text-sm font-medium text-gray-300">This
+                                product
+                                required stock.</label>
+                        </div>
                     </div>
 
-                    <p id="warning-msg" class="text-red-400 text-sm italic hidden">(You cannot check the 'no consumable item' and uncheck the 'required stock' at the same time.)</p>
+                    <p id="warning-msg" class="text-red-400 text-sm italic hidden">(You cannot check the 'no consumable
+                        item' and uncheck the 'required stock' at the same time.)</p>
 
                     @php
                         $isConsumableListEmpty = $consumable_list->groupBy('consumable_name')->sortBy('consumable_name')->isEmpty();
@@ -166,9 +167,13 @@
                                         @php $isFirstIndex = 0 === 0; @endphp
 
                                         <button type="button"
-                                            class="remove-item text-white bg-red-600 hover:bg-red-700 px-4 py-2.5 rounded-md text-sm {{ $isFirstIndex ? 'opacity-0 cursor-not-allowed' : '' }}"
+                                            class="remove-item bg-red-500 hover:bg-red-600 px-3 py-2.5 rounded-md text-sm mt-2 md:mt-0 border-none hover:opacity-75 {{ $isFirstIndex ? 'opacity-0 cursor-not-allowed' : '' }}"
                                             {{ $isFirstIndex ? 'disabled' : '' }}>
-                                            <i class="fas fa-trash mr-1"></i> Remove
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-white"
+                                                fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
                                         </button>
                                     </div>
                                     <div class="select-error text-red-500 text-sm mt-1" style="display: none;">Please
@@ -193,16 +198,17 @@
                             </p>
                         @endif
 
-
                         <button type="button" id="add-consumable-item"
                             data-is-empty="{{ $isConsumableListEmpty ? 'true' : 'false' }}"
-                            class="text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-md text-sm add-consumable-item {{ $isConsumableListEmpty ? 'opacity-50 cursor-not-allowed' : '' }}"
+                            class="text-white bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded-md text-sm add-consumable-item {{ $isConsumableListEmpty ? 'opacity-50 cursor-not-allowed' : '' }}"
                             {{ $isConsumableListEmpty ? 'disabled' : '' }}>
-                            <i class="fas fa-plus mr-1"></i> Add Consumable Item
+                            <i class="fas fa-plus mr-1"></i> Add Consumable
                         </button>
                     </div>
 
-                    <div class="grid gap-6 mb-6 md:grid-cols-2 mt-8">
+                    <div class="border-t border-gray-200 mt-9 mb-3"></div>
+
+                    <div class="grid gap-6 mb-6 md:grid-cols-2">
                         <div>
                             <label class="block text-medium font-semibold text-yellow-300">Price
                                 <span class="text-red-500">*</span></label>
@@ -213,7 +219,7 @@
 
                         <div class="flex justify-end items-end h-full">
                             <button type="submit" id="submitButton"
-                                class="inline-flex items-center px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-md">
+                                class="inline-flex items-center px-6 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-md">
                                 <i class="fas fa-save mr-2"></i>Add Product
                             </button>
                         </div>

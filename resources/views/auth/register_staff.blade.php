@@ -22,10 +22,10 @@
 
                 <!-- Email Address -->
                 <div class="mt-4">
-                    <x-input-label for="username" :value="__('Username')" />
-                    <x-text-input id="username" class="block mt-1 w-full" type="text" name="username"
-                        :value="old('username')" required autocomplete="username" />
-                    <x-input-error :messages="$errors->get('username')" class="mt-2" />
+                    <x-input-label for="email" :value="__('Email')" />
+                    <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" required
+                        autocomplete="email" />
+                    <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
                 <!-- Password -->
@@ -74,10 +74,9 @@
                         </th>
                         <th scope="col"
                             class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Username
+                            Email
                         </th>
-                        <th scope="col"
-                            class="text-center px-6 py-3 text-xs font-medium text-gray-300 uppercase">
+                        <th scope="col" class="text-center px-6 py-3 text-xs font-medium text-gray-300 uppercase">
                             Actions
                         </th>
                     </tr>
@@ -92,12 +91,21 @@
                                 {{ $staff->name }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                {{ $staff->username }}
+                                {{ $staff->email }}
                             </td>
                             <td class="text-center text-sm text-white font-medium">
-                                <button type="submit" class="p-0 m-0 bg-transparent border-none hover:opacity-75">
-                                    <img src="{{ asset('storage/logo/switch.png') }}" alt="Remove" class="w-6 h-6">
+                                <button type="button" onclick="openConfirmModal({{ $staff->id }})"
+                                    class="p-0 m-0 bg-transparent border-none hover:opacity-75">
+                                    <img src="{{ asset('storage/logo/deactivate_account.png') }}" alt="Deactivate"
+                                        class="w-6 h-6">
                                 </button>
+
+                                <form id="deactivateForm-{{ $staff->id }}" method="POST"
+                                    action="{{ route('staff.deactivate', $staff->id) }}">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="is_active" value="0">
+                                </form>
                             </td>
                         </tr>
                     @empty
@@ -106,8 +114,47 @@
                         </tr>
                     @endforelse
                 </tbody>
-
             </table>
+
+            <!-- Confirmation Modal -->
+            <div id="confirmModal" class="items-center justify-center z-50 fixed inset-0 bg-black bg-opacity-50 hidden">
+                <div>
+                    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirm Deactivation</h2>
+                        <p class="text-gray-700 mb-6">Are you sure you want to deactivate this account?</p>
+                        <div class="flex justify-end space-x-3">
+                            <button onclick="closeConfirmModal()"
+                                class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                            <button id="confirmDeactivateBtn"
+                                class="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700">Deactivate</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
+
+    <script>
+        let selectedId = null;
+
+        function openConfirmModal(stockId) {
+            selectedId = stockId;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            selectedId = null;
+            const modal = document.getElementById('confirmModal');
+            modal.classList.remove('flex');
+            modal.classList.add('hidden');
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', function () {
+            if (selectedId) {
+                document.getElementById('removeForm-' + selectedId).submit();
+            }
+        });
+    </script>
 </x-app-layout>

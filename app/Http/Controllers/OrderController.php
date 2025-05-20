@@ -14,7 +14,6 @@ use App\Models\ProductWithStockList;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -38,7 +37,10 @@ class OrderController extends Controller
         $query = Orders::with('items'); // Ensure the 'items' relation is loaded
 
         if ($request->start_date && $request->end_date) {
-            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+            $start = Carbon::parse($request->start_date)->startOfDay();
+            $end = Carbon::parse($request->end_date)->endOfDay();
+
+            $query->whereBetween('created_at', [$start, $end]);
         }
 
         $orders = $query->get();
@@ -194,8 +196,6 @@ class OrderController extends Controller
         return true;
     }
 
-
-
     private function revertTemporaryStock($product, $quantity)
     {
         $deductions = session('stockDeductions', []);
@@ -232,7 +232,6 @@ class OrderController extends Controller
 
         session(['stockDeductions' => $remainingDeductions]);
     }
-
 
     public function addToOrder(Request $request, $id)
     {

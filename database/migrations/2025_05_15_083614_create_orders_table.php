@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('staff_id')->constrained('staff')->onDelete('cascade');
             $table->decimal('total_amount', 10, 2)->default('0');
-            $table->string('payment_method');
+            $table->string('payment_method', 50);
             $table->integer('is_active')->default('1');
             $table->timestamps();
         });

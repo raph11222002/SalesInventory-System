@@ -34,11 +34,12 @@ Route::post('/order/confirm', [App\Http\Controllers\OrderController::class, 'con
 Route::get('/orders/{id}/download', [App\Http\Controllers\OrderController::class, 'downloadReceipt'])->name('orders.downloadReceipt');
 Route::get('/sales-report/download', [App\Http\Controllers\OrderController::class, 'downloadSalesReport'])->name('sales_report.download');
 
+Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('show.dashboard');
+
 Route::post('/login-staff', [App\Http\Controllers\StaffController::class, 'login'])
     ->middleware(['guest:staff'])->name('staff.login');
 
 Route::middleware(['auth:web'])->group(function () {
-    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('show.dashboard');
 
     // Add these routes to your routes/web.php file
     Route::get('/add-product', [App\Http\Controllers\ProductController::class, 'showAddProduct'])->name('add_product');
@@ -56,6 +57,7 @@ Route::middleware(['auth:web'])->group(function () {
 
     Route::get('/register-staff', [App\Http\Controllers\StaffController::class, 'showStaffRegister'])->name('show.register.staff');
     Route::post('/register-staff/store', [App\Http\Controllers\StaffController::class, 'store'])->name('admin.register.staff');
+    Route::patch('/user/{id}/deactivate', [App\Http\Controllers\StaffController::class, 'deactivate'])->name('staff.deactivate');
 });
 
 Route::middleware(['auth:staff', 'auth'])->group(function () {

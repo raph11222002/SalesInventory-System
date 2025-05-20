@@ -19,7 +19,7 @@ class StaffController extends Controller
      */
     public function showStaffRegister(): View
     {
-        $staffs = Staff::where('admin_id', Auth::guard('web')->id())->get();
+        $staffs = Staff::where('is_active', 1)->get();
 
         return view('auth.register_staff', compact('staffs'));
     }
@@ -33,14 +33,13 @@ class StaffController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'username' => ['required', 'string', 'lowercase', 'max:255', 'unique:' . Staff::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . Staff::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $staff = Staff::create([
-            'admin_id' => Auth::id(),
             'name' => $request->name,
-            'username' => $request->username,
+            'email' => $request->email,
             'password' => Hash::make($request->password),
         ]);
 
@@ -53,7 +52,7 @@ class StaffController extends Controller
     public function login(Request $request)
     {
         $credentials = $request->validate([
-            'username' => ['required', 'string'],
+            'email' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
@@ -68,13 +67,23 @@ class StaffController extends Controller
         }
 
         return back()->withErrors([
-            'username' => 'Invalid username or password.',
-        ])->onlyInput('username');
+            'email' => 'Invalid username or password.',
+        ])->onlyInput('email');
     }
     public function logout()
     {
         Auth::guard('staff')->logout();
-        
+
         return redirect('/');
     }
+
+    public function deactivate($id, Request $request)
+    {
+        $user = Staff::findOrFail($id);
+        $user->is_active = $request->input('is_active', 0);
+        $user->save();
+
+        return redirect()->back()->with('status', 'Account deactivated successfully.');
+    }
+
 }

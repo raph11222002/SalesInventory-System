@@ -16,7 +16,7 @@
             </h2>
 
             <button type="button"
-                class="inline-flex items-center px-8 py-3 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded ml-auto"
+                class="inline-flex items-center px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded ml-auto"
                 onclick="document.getElementById('stockModal-{{ $consumable->id }}').classList.remove('hidden')">
                 <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                     <path
@@ -48,6 +48,14 @@
                                 </th>
                                 <th scope="col"
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Price
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Expenses
+                                </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                     Date Received
                                 </th>
                                 <th scope="col"
@@ -66,27 +74,54 @@
                                         {{ $stock->quantity_added }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                        {{ \Carbon\Carbon::parse($stock->date_received)->format('Y-m-d') }}
+                                        ₱{{ number_format($stock->stock_price, 2) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                        <div class="flex justify-end">
-                                            <form method="POST"
-                                                action="{{ route('consumable.remove.stocks', [$stock->id, $consumable->id]) }}"
-                                                class="inline">
-                                                @csrf
-                                                @method('PATCH')
-                                                <button type="submit"
-                                                    class="p-0 m-0 bg-transparent border-none hover:opacity-75">
-                                                    <img src="{{ asset('storage/logo/delete.png') }}" alt="Remove"
-                                                        class="w-4 h-4">
-                                                </button>
-                                            </form>
+                                        ₱{{ number_format($stock->stock_expenses, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        {{ \Carbon\Carbon::parse($stock->created_at)->format(' h:i A, Y-m-d') }}
+                                    </td>
+
+                                    <td
+                                        class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        <div class="inline-flex items-center justify-center bg-red-500 rounded p-2">
+                                            <button type="button" onclick="openConfirmModal({{ $stock->id }})"
+                                                class="p-0 m-0 bg-transparent border-none hover:opacity-75">
+                                                <img src="{{ asset('storage/logo/remove.png') }}" alt="Remove"
+                                                    class="w-5 h-5">
+                                            </button>
                                         </div>
+
+
+                                        <form id="removeForm-{{ $stock->id }}" method="POST"
+                                            action="{{ route('consumable.remove.stocks', [$stock->id, $consumable->id]) }}">
+                                            @csrf
+                                            @method('PATCH')
+                                        </form>
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+
+                    <!-- Confirmation Modal -->
+                    <div id="confirmModal"
+                        class="items-center justify-center z-50 fixed inset-0 bg-black bg-opacity-50 hidden">
+                        <div>
+                            <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                                <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirm Removal
+                                </h2>
+                                <p class="text-gray-700 mb-6">Are you sure you want to remove this added stock?</p>
+                                <div class="flex justify-end space-x-3">
+                                    <button onclick="closeConfirmModal()"
+                                        class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                                    <button id="confirmBtn"
+                                        class="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700">Remove</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="mt-4">
                         {{ $stocks->links() }}
@@ -95,4 +130,25 @@
             </div>
         </div>
     </div>
+
+    <script>
+        let selectedId = null;
+
+        function openConfirmModal(stockId) {
+            selectedId = stockId;
+            document.getElementById('confirmModal').classList.remove('hidden');
+            document.getElementById('confirmModal').classList.add('flex');
+        }
+
+        function closeConfirmModal() {
+            selectedId = null;
+            document.getElementById('confirmModal').classList.add('hidden');
+        }
+
+        document.getElementById('confirmBtn').addEventListener('click', function () {
+            if (selectedId) {
+                document.getElementById('removeForm-' + selectedId).submit();
+            }
+        });
+    </script>
 </x-app-layout>

@@ -81,7 +81,7 @@
             </form>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 mb-10">
+        <div class="grid grid-cols-1 gap-4">
             <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
                 <h1 class="text-white text-2xl font-bold">Product Stock</h1>
 

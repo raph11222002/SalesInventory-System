@@ -14,9 +14,9 @@ return new class extends Migration
         Schema::create('product_consumable_needed', function (Blueprint $table) {
             $table->id();
             $table->foreignId('product_id')->constrained('product_list')->onDelete('cascade');
-            $table->string('product_name');
+            $table->string('product_name', 100);
             $table->foreignId('consumable_id')->constrained('consumable_list')->onDelete('cascade');
-            $table->string('consumable_name');
+            $table->string('consumable_name', 100);
             $table->integer('quantity_needed');
             $table->timestamps();
         });        

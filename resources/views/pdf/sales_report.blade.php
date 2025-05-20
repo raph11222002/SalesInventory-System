@@ -1,23 +1,55 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <title>Sales Report</title>
     <style>
-        body { font-family: DejaVu Sans, sans-serif; font-size: 12px; }
-        .header { text-align: center; margin-bottom: 20px; }
-        .section-title { margin-top: 20px; font-weight: bold; font-size: 16px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #000; padding: 6px; text-align: left; }
-        th { background-color: #f0f0f0; }
-        .total { font-weight: bold; }
+        body {
+            font-family: DejaVu Sans, sans-serif;
+            font-size: 12px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th,
+        td {
+            border: 1px solid #000;
+            padding: 6px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+
+        .total {
+            font-weight: bold;
+        }
     </style>
 </head>
+
 <body>
     <div class="header">
         <h2>Sales Report</h2>
+        <h3>Cally's Pizza Stop</h3>
         @if($startDate && $endDate)
-            <p>Date Range: {{ $startDate }} to {{ $endDate }}</p>
+            <p>Date: {{ $startDate }} to {{ $endDate }}</p>
         @endif
     </div>
 
@@ -38,6 +70,9 @@
                 <tr>
                     <th>Order ID</th>
                     <th>Staff</th>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Amount</th>
                     <th>Total</th>
                     <th>Payment</th>
                     <th>Time</th>
@@ -45,20 +80,21 @@
             </thead>
             <tbody>
                 @foreach ($orderGroup as $order)
-                    <tr>
-                        <td>{{ $order->id }}</td>
-                        <td>{{ $order->staff_id }}</td>
-                        <td>₱{{ number_format($order->total_amount, 2) }}</td>
-                        <td>{{ $order->payment_method }}</td>
-                        <td>{{ $order->created_at->format('h:i A') }}</td>
-                    </tr>
-
-                    @foreach ($order->items as $item)
+                    @php $itemCount = $order->items->count(); @endphp
+                    @foreach ($order->items as $index => $item)
                         <tr>
-                            <td colspan="1"></td>
-                            <td colspan="2">→ Product ID: {{ $item->product_id }}</td>
-                            <td>Qty: {{ $item->quantity }}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $itemCount }}">{{ $order->id }}</td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->staff->name }}</td>
+                            @endif
+                            <td>{{ $item->product->product_name }}</td>
+                            <td>{{ $item->quantity }}</td>
                             <td>₱{{ number_format($item->amount, 2) }}</td>
+                            @if ($index === 0)
+                                <td rowspan="{{ $itemCount }}">₱{{ number_format($order->total_amount, 2) }}</td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->payment_method }}</td>
+                                <td rowspan="{{ $itemCount }}">{{ $order->created_at->format('h:i A') }}</td>
+                            @endif
                         </tr>
                     @endforeach
                 @endforeach
@@ -66,4 +102,5 @@
         </table>
     @endforeach
 </body>
+
 </html>

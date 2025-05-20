@@ -17,8 +17,8 @@
     <body class="font-sans text-gray-900 antialiased">
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-300">
             <div>
-                <a href="/">
-                    <img src="{{ asset('storage/logo/459728249_122100422882523340_4977492472467994671_n-removebg-preview.png') }}" alt="Logo"
+                <a href="/dashboard">
+                    <img src="{{ asset('storage/logo/logo.png') }}" alt="Logo"
                     class="h-40 w-40">
                 </a>
             </div>

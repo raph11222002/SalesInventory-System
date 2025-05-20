@@ -12,10 +12,10 @@ class StockInList extends Model
     protected $table = 'stock_in_list';
 
     protected $fillable = [
-        'admin_id',
         'consumable_id',
         'quantity_added',
-        'date_received',
+        'stock_price',
+        'stock_expenses',
     ];
 
     // Relationship: belongs to a consumable

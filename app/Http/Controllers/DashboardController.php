@@ -15,6 +15,9 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
+        if (auth('staff')->check()) {
+            return redirect()->route('record_sales');
+        }
         // Filter logic based on 'filter' query param
         $filter = $request->query('filter', 'today');
 

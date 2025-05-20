@@ -48,7 +48,6 @@ class ConsumableController extends Controller
         // Insert new consumables
         foreach ($request->consumable as $item) {
             ConsumableList::create([
-                'admin_id' => Auth::guard('web')->id(),
                 'consumable_name' => $item['name'],
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -72,18 +71,24 @@ class ConsumableController extends Controller
     {
         $request->validate([
             'quantity' => 'required|integer|min:1',
+            'stock_price' => 'required|numeric|min:0',
         ]);
 
-        // Add stock to stock_list
+        $quantity = $request->input('quantity');
+        $stockPrice = $request->input('stock_price');
+        $stockExpenses = $quantity * $stockPrice;
+
         StockInList::create([
-            'admin_id' => Auth::guard('web')->id(),
             'consumable_id' => $consumableId,
-            'quantity_added' => $request->input('quantity'),
-            'date_received' => now(),
+            'quantity_added' => $quantity,
+            'stock_price' => $stockPrice,
+            'stock_expenses' => $stockExpenses,
         ]);
 
         // Recalculate total stock
-        $totalQuantity = StockInList::where('consumable_id', $consumableId)->sum('quantity_added');
+        $totalQuantity = StockInList::where('consumable_id', $consumableId)
+        ->where('is_active', 1)
+        ->sum('quantity_added');
 
         // Update inventories table
         ConsumableList::where('id', $consumableId)->update(['total_stock_left' => $totalQuantity]);
@@ -98,7 +103,7 @@ class ConsumableController extends Controller
 
         return view('view_stocks_consumable', compact('consumable', 'stocks'));
     }
-        public function removeStocks($stockId, $consumableId)
+    public function removeStocks($stockId, $consumableId)
     {
         // Update all stocks of this product to set is_active = 0
         StockInList::where('id', $stockId)

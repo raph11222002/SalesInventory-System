@@ -15,7 +15,7 @@
             <div class="flex justify-end mb-4">
                 <a href="{{ route('orders.downloadReceipt', $order->id) }}"
                    class="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-semibold rounded">
-                    Download as PDF
+                    Download
                 </a>
             </div>
 

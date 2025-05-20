@@ -110,9 +110,10 @@
         <h1>Order Receipt</h1>
 
         <div class="header">
+            <h3>Cally's Pizza Stop</h3>
             <div>Order ID: {{ $order->id }}</div>
             <div>
-                Date Ordered: {{ $order->created_at->format('F j, Y - h:i A') }}
+                Date: {{ $order->created_at->format('F j, Y - h:i A') }}
             </div>
         </div>
 
@@ -145,7 +146,7 @@
 
         <div class="footer-right">
             <div>Payment Method: {{ $order->payment_method ?? 'N/A' }}</div>
-            <div>Staff ID: {{ $order->staff_id ?? 'N/A' }}</div>
+            <div>Staff: {{ $order->staff->name ?? 'N/A' }}</div>
         </div>
     </div>
 </body>

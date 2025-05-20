@@ -8,11 +8,11 @@ use Illuminate\Notifications\Notifiable;
 class Staff extends Authenticatable
 {
     use Notifiable;
+    protected $table = 'staff';
 
     protected $fillable = [
-        'admin_id',
         'name',
-        'username',
+        'email',
         'password',
     ];
 

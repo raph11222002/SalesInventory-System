@@ -11,13 +11,14 @@ use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
+Route::post('user-login', [AuthenticatedSessionController::class, 'store'])->name('login');
+Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
 Route::middleware('guest:web')->group(function () {
     Route::get('register', [RegisteredUserController::class, 'create'])
         ->name('register');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
-
-    Route::post('/login-staff', [App\Http\Controllers\StaffController::class, 'login'])->name('staff.login');
 
     Route::post('admin-login', [AuthenticatedSessionController::class, 'store'])->name('admin.login');
 
@@ -52,7 +53,4 @@ Route::middleware('auth')->group(function () {
     Route::post('confirm-password', [ConfirmablePasswordController::class, 'store']);
 
     Route::put('password', [PasswordController::class, 'update'])->name('password.update');
-
-    Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
-        ->name('logout');
 });

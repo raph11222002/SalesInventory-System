@@ -77,7 +77,6 @@
                         <p class="text-sm font-medium text-blue-100">Total Sales</p>
                         <div class="flex items-baseline mt-1">
                             <h3 class="text-3xl font-extrabold">₱{{ $totalSales }}</h3>
-                            <span class="ml-2 text-sm text-blue-200" id="sales-period">Today</span>
                         </div>
                     </div>
 
@@ -241,7 +240,6 @@
                 'last3days': 'Last 3 Days',
                 'lifetime': 'Lifetime'
             };
-            document.getElementById('sales-period').textContent = periodLabels[currentFilter];
             document.getElementById('orders-period').textContent = periodLabels[currentFilter];
             document.getElementById('performance-period').textContent = periodLabels[currentFilter];
 
@@ -295,7 +293,6 @@
                 'lifetime': 'Lifetime'
             };
 
-            document.getElementById('sales-period').textContent = periodLabels[period];
             document.getElementById('orders-period').textContent = periodLabels[period];
             document.getElementById('performance-period').textContent = periodLabels[period];
 

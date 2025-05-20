@@ -13,10 +13,9 @@ return new class extends Migration
     {
         Schema::create('consumable_list', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
-            $table->string('consumable_name');
-            $table->string('total_stock_left')->default('0');
-            $table->string('is_active')->default('available');
+            $table->string('consumable_name', 100);
+            $table->integer('total_stock_left')->default('0');
+            $table->string('is_active', 20)->default('available');
             $table->timestamps();
         });
     }

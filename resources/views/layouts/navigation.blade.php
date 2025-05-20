@@ -19,7 +19,7 @@
 
                 @auth('staff')
                     <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                        <x-nav-link :href="route('record_sales')" :active="request()->routeIs('record_sales')">
+                        <x-nav-link :href="route('record_sales')" :active="request()->routeIs('record_sales') || request()->routeIs('product.order')">
                             {{ __('Record Sales') }}
                         </x-nav-link>
                     </div>
@@ -57,7 +57,6 @@
                 @endauth
             </div>
 
-            <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">

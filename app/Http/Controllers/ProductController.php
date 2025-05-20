@@ -57,7 +57,6 @@ class ProductController extends Controller
 
                 // Create product
                 $product = Product::create([
-                    'admin_id' => Auth::guard('web')->id(),
                     'image_path' => $path,
                     'product_group' => $request->product_group,
                     'product_name' => $request->product_name,
@@ -144,54 +143,52 @@ class ProductController extends Controller
         $perPage = 8;
         $currentPage = request()->get('page', 1);
 
-        // Step 1: Get all products
-        $allProducts = Product::select('id', 'product_name', 'is_active')
-            ->orderBy('product_name', 'asc')
-            ->get();
-
-        // Step 2: Get product IDs that require stock
+        // Step 1: Get all product IDs that require stock
         $stockProductIds = ProductWithStockList::pluck('product_id')->toArray();
 
-        // Step 3: Products WITH stock requirement
-        $productsWithStock = ProductWithStockList::withCount('productStockInList')
+        // Step 2: Fetch products WITH stock requirement, eager loading relationships
+        $productsWithStock = ProductWithStockList::with([
+            'product',
+            'productStockInList' => function ($query) {
+                $query->where('is_active', 1);
+            }
+        ])
             ->whereIn('product_id', $stockProductIds)
-            ->get()
-            ->map(function ($item) use ($allProducts) {
-                $product = $allProducts->firstWhere('id', $item->product_id);
-                return [
-                    'product_id' => $item->product_id,
-                    'product_name' => $product->product_name ?? 'Unknown',
-                    'is_active' => $product->is_active ?? 'unavailable',
-                    'product_stock_in_list_count' => $item->product_stock_in_list_count,
-                    'required_stock' => $item->required_stock,
-                    'requires_stock' => true,
-                ];
-            });
+            ->get();
 
-        // Step 4: Products WITHOUT stock requirement
-        $productsWithoutStock = $allProducts
-            ->filter(function ($product) use ($stockProductIds) {
-                return !in_array($product->id, $stockProductIds);
-            })
+        // Step 3: Map to uniform objects expected by Blade
+        $productsWithStockMapped = $productsWithStock->map(function ($item) {
+            return (object) [
+                'product_id' => $item->product_id,
+                'product_name' => $item->product->product_name ?? 'Unknown',
+                'is_active' => $item->product->is_active ?? 'unavailable',
+                'required_stock' => true,
+                'required_stock_count' => $item->required_stock,
+                'productStockInList' => $item->productStockInList, // collection used in Blade for sums
+                'product' => $item->product,
+            ];
+        });
+
+        // Step 4: Fetch products WITHOUT stock requirement
+        $productsWithoutStock = Product::whereNotIn('id', $stockProductIds)
+            ->orderBy('product_name', 'asc')
+            ->get()
             ->map(function ($product) {
-                return [
+                return (object) [
                     'product_id' => $product->id,
                     'product_name' => $product->product_name,
                     'is_active' => $product->is_active ?? 'unavailable',
-                    'product_stock_in_list_count' => 0,
-                    'required_stock' => "Doesn't require stock",
-                    'requires_stock' => false,
+                    'required_stock' => false,
+                    'required_stock_count' => 0,
+                    'productStockInList' => collect(), // empty collection to avoid errors in Blade
+                    'product' => $product,
                 ];
             });
 
-        // Step 5: Merge the collections properly
-        $mergedProducts = collect($productsWithStock)
-            ->merge(collect($productsWithoutStock))
-            ->sortBy('product_name')
-            ->map(fn($item) => (object) $item)
-            ->values();
+        // Step 5: Merge both collections and sort by product_name
+        $mergedProducts = $productsWithStockMapped->merge($productsWithoutStock)->sortBy('product_name')->values();
 
-        // Step 6: Paginate manually
+        // Step 6: Manual pagination for merged collection
         $paginated = new LengthAwarePaginator(
             $mergedProducts->forPage($currentPage, $perPage),
             $mergedProducts->count(),
@@ -200,6 +197,7 @@ class ProductController extends Controller
             ['path' => request()->url(), 'query' => request()->query()]
         );
 
+        // Pass the paginated collection to your Blade view
         return view('product_list', ['product_with_stock_list' => $paginated]);
     }
 
@@ -234,14 +232,18 @@ class ProductController extends Controller
     {
         $request->validate([
             'quantity' => 'required|integer|min:1',
+            'stock_price' => 'required|numeric|min:0',
         ]);
 
-        // Add stock to stock_list
+        $quantity = $request->input('quantity');
+        $stockPrice = $request->input('stock_price');
+        $stockExpenses = $quantity * $stockPrice;
+
         ProductStockInList::create([
-            'admin_id' => Auth::guard('web')->id(),
             'product_id' => $productId,
             'quantity_added' => $request->input('quantity'),
-            'date_received' => now(),
+            'stock_price' => $stockPrice,
+            'stock_expenses' => $stockExpenses,
         ]);
 
         // Recalculate total stock

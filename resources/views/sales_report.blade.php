@@ -12,7 +12,21 @@
 
                     <!-- Date Range Filter -->
                     <div class="bg-gray-900 rounded-lg p-6 mb-6">
-                        <h2 class="text-xl font-bold text-white mb-4">Filter Orders by Date</h2>
+                        <div class="flex justify-between">
+                            <h2 class="text-xl font-bold text-white mb-4">Filter Orders by Date</h2>
+
+                            <!-- Download Report Button -->
+                            <form id="download-form" action="{{ route('sales_report.download') }}" method="GET"
+                                class="inline">
+                                <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                                <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+
+                                <button type="submit"
+                                    class="p-0 m-0 hover:bg-green-400 px-2.5 py-2 rounded-md text-sm mt-2 md:mt-0 hover:opacity-75 border border-green-400">
+                                    <img src="{{ asset('storage/logo/download.png') }}" alt="Download" class="w-5 h-5">
+                                </button>
+                            </form>
+                        </div>
 
                         <!-- Date Picker Form -->
                         <form action="{{ route('orders.filter') }}" method="GET">
@@ -62,29 +76,11 @@
                                         class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md font-semibold">
                                         Filter
                                     </button>
-                                    <a href="{{ route('sales_report') }}" class="inline-block">
-                                        <img src="{{ asset('storage/logo/undo.png') }}" alt="Reset"
-                                            class="w-6 h-6 hover:opacity-75">
+                                    <a href="{{ route('sales_report') }}"
+                                        class="inline-block hover:bg-gray-600 px-2.5 py-2 rounded-md text-sm mt-2 md:mt-0 border hover:opacity-75">
+                                        <img src="{{ asset('storage/logo/reset.png') }}" alt="Reset" class="w-5 h-5">
                                     </a>
                                 </div>
-
-
-                                <!-- Download Report Button -->
-                                <form id="download-form" action="{{ route('sales_report.download') }}" method="GET"
-                                    class="inline">
-                                    <button type="submit" class="p-0 m-0 bg-transparent border-none">
-                                        <img src="{{ asset('storage/logo/downloads.png') }}" alt="Download"
-                                            class="w-6 h-6 hover:opacity-75">
-                                    </button>
-                                </form>
-
-
-                                <form id="download-form" action="{{ route('sales_report.download') }}" method="GET"
-                                    class="hidden">
-                                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
-                                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
-                                </form>
-
                             </div>
                         </form>
                     </div>

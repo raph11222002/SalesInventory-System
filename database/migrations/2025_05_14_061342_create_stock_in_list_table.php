@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('stock_in_list', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('admin_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('consumable_id')->constrained('consumable_list')->onDelete('cascade');
             $table->integer('quantity_added');
-            $table->date('date_received');
+            $table->decimal('stock_price', 10, 2);
+            $table->decimal('stock_expenses', 10, 2);
             $table->integer('is_active')->default('1');
             $table->timestamps();
         });        

@@ -64,9 +64,14 @@
                                     <form action="{{ route('order.remove-item') }}" method="POST">
                                         @csrf
                                         <input type="hidden" name="index" value="{{ $index }}">
+
                                         <button type="submit"
-                                            class="inline-flex items-center px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-sm font-medium rounded">
-                                            Remove
+                                            class="remove-item bg-red-500 hover:bg-red-600 px-2 py-1.5 rounded-md text-sm mt-2 md:mt-0 border-none hover:opacity-75">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-white" fill="none"
+                                                viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
                                         </button>
                                     </form>
                                 </td>
@@ -98,7 +103,7 @@
 
                     @if(session()->has('orderItems') && count(session('orderItems')) > 0)
                         <button id="confirmOrderBtn"
-                            class="w-56 bg-green-600 hover:bg-green-500 text-white py-2 rounded font-medium transition-colors duration-200 transform hover:scale-[1.02]">
+                            class="w-56 bg-green-600 hover:bg-green-700 text-white py-2 rounded font-medium transition-colors duration-200 transform hover:scale-[1.02]">
                             Confirm Order
                         </button>
                     @else
@@ -144,9 +149,9 @@
                                     </tr>
                                 @endforeach
                             @endif
-                            
+
                             <tr>
-                                
+
                                 <td colspan="3" class="px-4 py-2 text-right font-bold">Total:</td>
                                 <td class="px-4 py-2 text-right font-bold">
                                     ₱{{ number_format(session('totalAmount', 0), 2) }}</td>
@@ -177,8 +182,8 @@
                 <div class="flex justify-end space-x-3">
                     <button type="button"
                         onclick="document.getElementById('paymentMethodModal').classList.add('hidden')"
-                        class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-green-600 hover:bg-green-500 text-white rounded">Complete
+                        class="px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-400 rounded text-white">Complete
                         Order</button>
                 </div>
             </form>

@@ -55,6 +55,10 @@
                                         Total Stock Left
                                     </th>
                                     <th scope="col"
+                                        class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                        Total Expenses
+                                    </th>
+                                    <th scope="col"
                                         class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
                                         Actions
                                     </th>
@@ -77,6 +81,9 @@
                                                 <span class="ml-2 text-red-400 text-xs">(Low)</span>
                                             @endif
                                         </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                            ₱{{ number_format($consumable->stockInList->where('is_active', 1)->sum('stock_expenses'), 2) }}
+                                        </td>
 
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300 text-right">
                                             <div class="flex justify-end">
@@ -87,15 +94,16 @@
                                                     </a>
                                                 @else
                                                     <button type="button"
-                                                        class="inline-flex items-center px-3 py-1.5 bg-yellow-900 hover:bg-yellow-700 text-white text-sm font-medium rounded"
+                                                        class="inline-flex items-center px-3 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-sm font-medium rounded"
                                                         onclick="document.getElementById('stockModal-{{ $consumable->id }}').classList.remove('hidden')">
-                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg"
-                                                            viewBox="0 0 20 20" fill="currentColor">
-                                                            <path
-                                                                d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                                        <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                                            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                d="M12 4v16m8-8H4" />
                                                         </svg>
                                                         Add Stock
                                                     </button>
+
                                                 @endif
 
                                                 @include('modals.stockModal', ['inventory' => $consumable])

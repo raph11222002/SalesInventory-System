@@ -57,14 +57,34 @@
 
                             <!-- Buttons -->
                             <div class="mt-4 flex justify-between">
-                                <button type="submit"
-                                    class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md font-semibold">
-                                    Apply Filters
-                                </button>
-                                <a href="{{ route('sales_report') }}"
-                                    class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded-md font-semibold">
-                                    Reset
-                                </a>
+                                <div class="flex items-center space-x-3">
+                                    <button type="submit"
+                                        class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-md font-semibold">
+                                        Filter
+                                    </button>
+                                    <a href="{{ route('sales_report') }}" class="inline-block">
+                                        <img src="{{ asset('storage/logo/undo.png') }}" alt="Reset"
+                                            class="w-6 h-6 hover:opacity-75">
+                                    </a>
+                                </div>
+
+
+                                <!-- Download Report Button -->
+                                <form id="download-form" action="{{ route('sales_report.download') }}" method="GET"
+                                    class="inline">
+                                    <button type="submit" class="p-0 m-0 bg-transparent border-none">
+                                        <img src="{{ asset('storage/logo/downloads.png') }}" alt="Download"
+                                            class="w-6 h-6 hover:opacity-75">
+                                    </button>
+                                </form>
+
+
+                                <form id="download-form" action="{{ route('sales_report.download') }}" method="GET"
+                                    class="hidden">
+                                    <input type="hidden" name="start_date" value="{{ request('start_date') }}">
+                                    <input type="hidden" name="end_date" value="{{ request('end_date') }}">
+                                </form>
+
                             </div>
                         </form>
                     </div>

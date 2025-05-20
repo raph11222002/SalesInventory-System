@@ -76,14 +76,13 @@
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit"
-                                                    class="inline-flex items-center px-3 py-1.5 bg-red-700 hover:bg-red-600 text-white text-sm font-medium rounded">
-                                                    Remove
+                                                    class="p-0 m-0 bg-transparent border-none hover:opacity-75">
+                                                    <img src="{{ asset('storage/logo/delete.png') }}" alt="Remove"
+                                                        class="w-4 h-4">
                                                 </button>
                                             </form>
-
                                         </div>
                                     </td>
-                                    </a>
                                 </tr>
                             @endforeach
                         </tbody>

@@ -50,6 +50,10 @@
                                     class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                     Date Received
                                 </th>
+                                <th scope="col"
+                                    class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                    Actions
+                                </th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-700">
@@ -63,6 +67,21 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                         {{ \Carbon\Carbon::parse($stock->date_received)->format('Y-m-d') }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        <div class="flex justify-end">
+                                            <form method="POST"
+                                                action="{{ route('consumable.remove.stocks', [$stock->id, $consumable->id]) }}"
+                                                class="inline">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit"
+                                                    class="p-0 m-0 bg-transparent border-none hover:opacity-75">
+                                                    <img src="{{ asset('storage/logo/delete.png') }}" alt="Remove"
+                                                        class="w-4 h-4">
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach

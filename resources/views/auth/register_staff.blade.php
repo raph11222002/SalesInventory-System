@@ -77,7 +77,7 @@
                             Username
                         </th>
                         <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            class="text-center px-6 py-3 text-xs font-medium text-gray-300 uppercase">
                             Actions
                         </th>
                     </tr>
@@ -94,8 +94,10 @@
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                 {{ $staff->username }}
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                
+                            <td class="text-center text-sm text-white font-medium">
+                                <button type="submit" class="p-0 m-0 bg-transparent border-none hover:opacity-75">
+                                    <img src="{{ asset('storage/logo/switch.png') }}" alt="Remove" class="w-6 h-6">
+                                </button>
                             </td>
                         </tr>
                     @empty

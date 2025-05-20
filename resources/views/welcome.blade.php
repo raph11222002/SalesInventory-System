@@ -20,7 +20,7 @@
 
 
 <body class="relative min-h-screen flex items-center justify-center p-4">
-        <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('{{ asset('storage/logo/background_image.jpg') }}');">
+        <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('{{ asset('storage/logo/background.jpg') }}');">
         <div class="w-full h-full bg-black/50"></div>
     </div>
 

@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Orders;
-use App\Models\OrderItems;
 use Illuminate\Http\Request;
 use App\Models\Product;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Models\StockInList;
 use App\Models\ProductStockInList;
 use App\Models\ConsumableList;
@@ -116,7 +115,9 @@ class ProductController extends Controller
             return redirect()->route('welcome'); // or custom logic
         }
 
-        $products = Product::with('productConsumableNeeded')->get();
+        $products = Product::with('productConsumableNeeded')
+            ->where('is_active', 'available')
+            ->get();
         $groupedProducts = $products->groupBy('product_group');
 
         return view('record_sales', compact('data', 'groupedProducts'));
@@ -143,9 +144,8 @@ class ProductController extends Controller
         $perPage = 8;
         $currentPage = request()->get('page', 1);
 
-        // Step 1: Get all products from product_list
-        $allProducts = DB::table('product_list')
-            ->select('id', 'product_name', 'is_active')
+        // Step 1: Get all products
+        $allProducts = Product::select('id', 'product_name', 'is_active')
             ->orderBy('product_name', 'asc')
             ->get();
 
@@ -158,7 +158,7 @@ class ProductController extends Controller
             ->get()
             ->map(function ($item) use ($allProducts) {
                 $product = $allProducts->firstWhere('id', $item->product_id);
-                return (object) [
+                return [
                     'product_id' => $item->product_id,
                     'product_name' => $product->product_name ?? 'Unknown',
                     'is_active' => $product->is_active ?? 'unavailable',
@@ -169,24 +169,30 @@ class ProductController extends Controller
             });
 
         // Step 4: Products WITHOUT stock requirement
-        $productsWithoutStock = $allProducts->filter(function ($product) use ($stockProductIds) {
-            return !in_array($product->id, $stockProductIds);
-        })->map(function ($product) {
-            return (object) [
-                'product_id' => $product->id,
-                'product_name' => $product->product_name,
-                'is_active' => $product->is_active ?? 'unavailable',
-                'product_stock_in_list_count' => 0,
-                'required_stock' => "Doesn't require stock",
-                'requires_stock' => false,
-            ];
-        });
+        $productsWithoutStock = $allProducts
+            ->filter(function ($product) use ($stockProductIds) {
+                return !in_array($product->id, $stockProductIds);
+            })
+            ->map(function ($product) {
+                return [
+                    'product_id' => $product->id,
+                    'product_name' => $product->product_name,
+                    'is_active' => $product->is_active ?? 'unavailable',
+                    'product_stock_in_list_count' => 0,
+                    'required_stock' => "Doesn't require stock",
+                    'requires_stock' => false,
+                ];
+            });
 
-        // Step 5: Merge and sort
-        $mergedProducts = $productsWithStock->merge($productsWithoutStock)->sortBy('product_name')->values();
+        // Step 5: Merge the collections properly
+        $mergedProducts = collect($productsWithStock)
+            ->merge(collect($productsWithoutStock))
+            ->sortBy('product_name')
+            ->map(fn($item) => (object) $item)
+            ->values();
 
         // Step 6: Paginate manually
-        $paginated = new \Illuminate\Pagination\LengthAwarePaginator(
+        $paginated = new LengthAwarePaginator(
             $mergedProducts->forPage($currentPage, $perPage),
             $mergedProducts->count(),
             $perPage,
@@ -201,7 +207,7 @@ class ProductController extends Controller
     {
         $product_stock = ProductWithStockList::where('product_id', $productId)->firstOrFail();
         $stocks = $product_stock->productStockInList()
-            ->where('is_active', 1)  // show only active stocks
+            ->where('is_active', 1)
             ->orderBy('id')
             ->paginate(10);
 

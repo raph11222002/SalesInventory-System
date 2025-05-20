@@ -138,7 +138,7 @@
                                                                 </svg>
                                                                 Add Stock
                                                             </button>
-                                                            @include('modals.productStockModal', $product_stock)
+                                                            @include('modals.productStockModal', ['product_stock' => $product_stock])
                                                         @endif
                                                     @endif
                                                 @endif
@@ -150,10 +150,11 @@
                                                     @csrf
                                                     @method('PATCH')
                                                     @if (($product_stock->is_active ?? 'available') === 'available')
-                                                        <button type="submit"
-                                                            class="inline-flex items-center px-3 py-1.5 bg-gray-600 hover:bg-gray-500 text-white text-sm font-medium rounded">
-                                                            Mark as Unavailable
+                                                        <button type="submit" class="bg-transparent p-0 m-0 border-none">
+                                                            <img src="{{ asset('storage/logo/unavailable.png') }}"
+                                                                alt="Mark as Unavailable" class="w-6 h-6 hover:opacity-75">
                                                         </button>
+
                                                     @else
                                                         <button type="submit"
                                                             class="inline-flex items-center px-3 py-1.5 bg-green-700 hover:bg-green-600 text-white text-sm font-medium rounded"
@@ -175,9 +176,8 @@
                                                         d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                <p class="text-lg font-medium">No product that requires stock found</p>
-                                                <p class="text-sm text-gray-400 mt-1">No product that requires stock records
-                                                    available</p>
+                                                <p class="text-lg font-medium">No product yet</p>
+                                                <p class="text-sm text-gray-400 mt-1">No product available</p>
                                             </div>
                                         </td>
                                     </tr>

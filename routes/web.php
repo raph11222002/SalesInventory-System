@@ -32,6 +32,7 @@ Route::post('/order/remove-item', [App\Http\Controllers\OrderController::class, 
 Route::post('/order/confirm', [App\Http\Controllers\OrderController::class, 'confirmOrder'])->name('order.confirm');
 
 Route::get('/orders/{id}/download', [App\Http\Controllers\OrderController::class, 'downloadReceipt'])->name('orders.downloadReceipt');
+Route::get('/sales-report/download', [App\Http\Controllers\OrderController::class, 'downloadSalesReport'])->name('sales_report.download');
 
 Route::post('/login-staff', [App\Http\Controllers\StaffController::class, 'login'])
     ->middleware(['guest:staff'])->name('staff.login');
@@ -51,6 +52,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::post('/consumable-store', [App\Http\Controllers\ConsumableController::class, 'consumableStore'])->name('consumable.store');
     Route::post('/consumable-list/{id}/add-stock', [App\Http\Controllers\ConsumableController::class, 'addStock'])->name('inventories.addStock');
     Route::get('/consumable-list/{consumable}/stocks', [App\Http\Controllers\ConsumableController::class, 'viewConsumableStocks'])->name('view.consumable.stocks');
+    Route::patch('/consumable/{stockId}/remove-stocks/{consumableId}', [App\Http\Controllers\ConsumableController::class, 'removeStocks'])->name('consumable.remove.stocks');
 
     Route::get('/register-staff', [App\Http\Controllers\StaffController::class, 'showStaffRegister'])->name('show.register.staff');
     Route::post('/register-staff/store', [App\Http\Controllers\StaffController::class, 'store'])->name('admin.register.staff');

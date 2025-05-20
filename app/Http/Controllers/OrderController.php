@@ -11,10 +11,10 @@ use App\Models\ProductStockInList;
 use App\Models\ConsumableList;
 use App\Models\ProductConsumable;
 use App\Models\ProductWithStockList;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -32,6 +32,24 @@ class OrderController extends Controller
         $pdf = Pdf::loadView('pdf.receipt', compact('order'));
 
         return $pdf->download('Order_Receipt_' . $order->id . '.pdf');
+    }
+    public function downloadSalesReport(Request $request)
+    {
+        $query = Orders::with('items'); // Ensure the 'items' relation is loaded
+
+        if ($request->start_date && $request->end_date) {
+            $query->whereBetween('created_at', [$request->start_date, $request->end_date]);
+        }
+
+        $orders = $query->get();
+
+        $pdf = Pdf::loadView('pdf.sales_report', [
+            'orders' => $orders,
+            'startDate' => $request->start_date,
+            'endDate' => $request->end_date,
+        ]);
+
+        return $pdf->download('sales_report_' . now()->format('Ymd_His') . '.pdf');
     }
     public function orderForm($id)
     {
@@ -73,10 +91,6 @@ class OrderController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        /*$order_list = $orders->groupBy(function ($order) {
-            return $order->created_at->format('Y-m-d');
-        });*/
-
         return view('sales_report', compact('data', 'orders'));
     }
     public function filterOrders(Request $request)
@@ -92,64 +106,131 @@ class OrderController extends Controller
         return view('sales_report', compact('orders'));
     }
 
-    private function calculateTotalAmount($items)
-    {
-        $total = 0;
-        foreach ($items as $item) {
-            $total += $item['quantity'] * $item['product_price'];
-        }
-        return $total;
-    }
-
     private function deductTemporaryStock($product, $quantity)
     {
         $consumables = ProductConsumable::where('product_id', $product->id)->get();
         $productWithStock = ProductWithStockList::where('product_id', $product->id)->first();
+        $deductions = [];
 
-        $deductions = session('stockDeductions', []);
+        // Step 1: Pre-validate ALL stock requirements first (NO deduction yet)
 
-        // Check consumables
         foreach ($consumables as $c) {
             $needed = $c->quantity_needed * $quantity;
-            $available = StockInList::where('consumable_id', $c->consumable_id)->sum('quantity_added');
-            if ($needed > $available)
-                return "Insufficient stock for consumable: " . $c->consumable->consumable_name;
+            $available = StockInList::where('consumable_id', $c->consumable_id)
+                ->where('is_active', 1)
+                ->sum('quantity_added');
 
-            // Temporarily deduct
-            StockInList::where('consumable_id', $c->consumable_id)->first()->decrement('quantity_added', $needed);
-            $deductions[] = ['type' => 'consumable', 'id' => $c->consumable_id, 'qty' => $needed];
+            if ($needed > $available) {
+                return "Insufficient stock for consumable: " . $c->consumable->consumable_name;
+            }
         }
 
-        // Check product stock
         if ($productWithStock && $quantity > 0) {
-            $available = ProductStockInList::where('product_id', $product->id)->sum('quantity_added');
-            if ($quantity > $available)
-                return "Insufficient stock for product: {$product->product_name}";
+            $available = ProductStockInList::where('product_id', $product->id)
+                ->where('is_active', 1)
+                ->sum('quantity_added');
 
-            ProductStockInList::where('product_id', $product->id)->first()->decrement('quantity_added', $quantity);
-            $deductions[] = ['type' => 'product', 'id' => $product->id, 'qty' => $quantity];
+            if ($quantity > $available) {
+                return "Insufficient stock for product: {$product->product_name}";
+            }
+        }
+
+        // Step 2: Perform deduction (since all checks passed)
+
+        foreach ($consumables as $c) {
+            $needed = $c->quantity_needed * $quantity;
+            $stockItems = StockInList::where('consumable_id', $c->consumable_id)
+                ->where('is_active', 1)
+                ->orderBy('id')
+                ->get();
+
+            $remainingToDeduct = $needed;
+            foreach ($stockItems as $stockItem) {
+                if ($remainingToDeduct <= 0)
+                    break;
+
+                $deductQty = min($remainingToDeduct, $stockItem->quantity_added);
+                $stockItem->decrement('quantity_added', $deductQty);
+                $remainingToDeduct -= $deductQty;
+
+                $deductions[] = ['type' => 'consumable', 'id' => $stockItem->id, 'qty' => $deductQty];
+            }
+
+            // Update total_stock_left in ConsumableList
+            $total = StockInList::where('consumable_id', $c->consumable_id)
+                ->where('is_active', 1)
+                ->sum('quantity_added');
+            ConsumableList::where('id', $c->consumable_id)->update(['total_stock_left' => $total]);
+        }
+
+        // Deduct product stock
+        if ($productWithStock && $quantity > 0) {
+            $stockItems = ProductStockInList::where('product_id', $product->id)
+                ->where('is_active', 1)
+                ->orderBy('id')
+                ->get();
+
+            $remainingToDeduct = $quantity;
+            foreach ($stockItems as $stockItem) {
+                if ($remainingToDeduct <= 0)
+                    break;
+
+                $deductQty = min($remainingToDeduct, $stockItem->quantity_added);
+                $stockItem->decrement('quantity_added', $deductQty);
+                $remainingToDeduct -= $deductQty;
+
+                $deductions[] = ['type' => 'product', 'id' => $stockItem->id, 'qty' => $deductQty];
+            }
+
+            // Update required_stock
+            $newTotal = ProductStockInList::where('product_id', $product->id)
+                ->where('is_active', 1)
+                ->sum('quantity_added');
+            $productWithStock->required_stock = $newTotal;
+            $productWithStock->save();
         }
 
         session(['stockDeductions' => $deductions]);
         return true;
     }
 
+
+
     private function revertTemporaryStock($product, $quantity)
     {
         $deductions = session('stockDeductions', []);
-        $newDeductions = [];
+        $remainingDeductions = [];
 
         foreach ($deductions as $deduction) {
             if ($deduction['type'] === 'consumable') {
-                StockInList::where('consumable_id', $deduction['id'])->first()->increment('quantity_added', $deduction['qty']);
+                $stockItem = StockInList::find($deduction['id']);
+                if ($stockItem) {
+                    $stockItem->increment('quantity_added', $deduction['qty']);
+
+                    // Update total_stock_left in ConsumableList
+                    $total = StockInList::where('consumable_id', $stockItem->consumable_id)
+                        ->where('is_active', 1)
+                        ->sum('quantity_added');
+                    ConsumableList::where('id', $stockItem->consumable_id)->update(['total_stock_left' => $total]);
+                }
             } elseif ($deduction['type'] === 'product') {
-                ProductStockInList::where('product_id', $deduction['id'])->first()->increment('quantity_added', $deduction['qty']);
+                $stockItem = ProductStockInList::find($deduction['id']);
+                if ($stockItem) {
+                    $stockItem->increment('quantity_added', $deduction['qty']);
+
+                    // Update required_stock in ProductWithStockList
+                    $newTotal = ProductStockInList::where('product_id', $stockItem->product_id)
+                        ->where('is_active', 1)
+                        ->sum('quantity_added');
+                    ProductWithStockList::where('product_id', $stockItem->product_id)
+                        ->update(['required_stock' => $newTotal]);
+                }
             } else {
-                $newDeductions[] = $deduction;
+                $remainingDeductions[] = $deduction;
             }
         }
 
-        session(['stockDeductions' => $newDeductions]);
+        session(['stockDeductions' => $remainingDeductions]);
     }
 
 
@@ -348,5 +429,13 @@ class OrderController extends Controller
         session()->forget(['orderItems', 'totalAmount']);
 
         return redirect()->route('record_sales')->with('success', 'Order completed successfully!');
+    }
+    private function calculateTotalAmount($items)
+    {
+        $total = 0;
+        foreach ($items as $item) {
+            $total += $item['quantity'] * $item['product_price'];
+        }
+        return $total;
     }
 }

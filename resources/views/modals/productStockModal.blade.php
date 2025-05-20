@@ -23,7 +23,7 @@
                     @csrf
 
                     <label for="quantity" class="block text-sm font-medium text-gray-700">Quantity</label>
-                    <input type="number" name="quantity" id="quantity" min="1"
+                    <input type="number" name="quantity" id="quantity" min="1" autocomplete="off"
                            class="mt-1 block w-full rounded-md text-black border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
                            placeholder="Enter quantity" required>
 

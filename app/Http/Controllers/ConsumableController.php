@@ -93,9 +93,26 @@ class ConsumableController extends Controller
     // In ConsumableController.php
     public function viewConsumableStocks($consumableId)
     {
-        $consumable = ConsumableList::findOrFail($consumableId);
-        $stocks = $consumable->stockInList()->orderBy('id')->paginate(10);
+        $consumable = ConsumableList::where('id', $consumableId)->firstOrFail();
+        $stocks = $consumable->stockInList()->where('is_active', 1)->orderBy('id')->paginate(10);
 
         return view('view_stocks_consumable', compact('consumable', 'stocks'));
+    }
+        public function removeStocks($stockId, $consumableId)
+    {
+        // Update all stocks of this product to set is_active = 0
+        StockInList::where('id', $stockId)
+            ->where('is_active', 1)
+            ->update(['is_active' => 0]);
+
+        $totalQuantity = StockInList::where('consumable_id', $consumableId)
+            ->where('is_active', 1)
+            ->sum('quantity_added');
+
+        // Update
+        ConsumableList::where('id', $consumableId)->update(['total_stock_left' => $totalQuantity]);
+
+        // Optionally redirect back with success message
+        return redirect()->back()->with('success', 'Stocks marked as inactive.');
     }
 }

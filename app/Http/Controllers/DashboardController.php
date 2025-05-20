@@ -51,7 +51,7 @@ class DashboardController extends Controller
             ->map(function ($items, $productName) {
                 return [
                     'product_name' => $productName,
-                    'revenue' => $items->sum('order.total_amount'),
+                    'revenue' => $items->sum('amount'),
                 ];
             })
             ->sortByDesc('revenue')

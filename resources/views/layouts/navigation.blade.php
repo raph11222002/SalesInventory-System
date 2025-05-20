@@ -5,8 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <img src="{{ asset('storage/logo/459728249_122100422882523340_4977492472467994671_n-removebg-preview.png') }}"
-                        alt="Logo" class="h-16 w-16">
+                    <img src="{{ asset('storage/logo/logo.png') }}" alt="Logo" class="h-16 w-16">
                 </div>
 
                 <!-- Navigation Links -->
@@ -18,11 +17,13 @@
                     </div>
                 @endauth
 
-                <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('record_sales')" :active="request()->routeIs('record_sales')">
-                        {{ __('Record Sales') }}
-                    </x-nav-link>
-                </div>
+                @auth('staff')
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link :href="route('record_sales')" :active="request()->routeIs('record_sales')">
+                            {{ __('Record Sales') }}
+                        </x-nav-link>
+                    </div>
+                @endauth
 
                 @auth('web')
                     <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -32,12 +33,6 @@
                     </div>
                 @endauth
 
-                <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('sales_report')" :active="request()->routeIs('sales_report')">
-                        {{ __('Orders') }}
-                    </x-nav-link>
-                </div>
-
                 @auth('web')
                     <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('consumable_list')" :active="request()->routeIs('consumable_list') || request()->routeIs('add.consumable')">
@@ -45,6 +40,12 @@
                         </x-nav-link>
                     </div>
                 @endauth
+
+                <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                    <x-nav-link :href="route('sales_report')" :active="request()->routeIs('sales_report')">
+                        {{ __('Orders') }}
+                    </x-nav-link>
+                </div>
 
                 @auth('web')
                     <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
@@ -90,7 +91,7 @@
                                 @csrf
 
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                            this.closest('form').submit();">
+                                                                this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>
@@ -99,7 +100,7 @@
                                 @csrf
 
                                 <x-dropdown-link :href="route('logout')" onclick="event.preventDefault();
-                                                            this.closest('form').submit();">
+                                                                this.closest('form').submit();">
                                     {{ __('Log Out') }}
                                 </x-dropdown-link>
                             </form>

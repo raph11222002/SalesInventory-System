@@ -72,16 +72,7 @@
                                 value=""
                                 class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
                             <label for="product-consumable-checkbox" class="ms-2 text-sm font-medium text-gray-300">This
-                                product has no consumable item.</label>
-                        </div>
-                        <div>
-                            <input id="product-required-stock-checkbox" name="product_required_stock_checkbox"
-                                type="checkbox" value=""
-                                class="w-4 h-4 text-blue-600 rounded-sm focus:ring-blue-600 ring-offset-gray-800 focus:ring-2 bg-gray-700 border-gray-600">
-                            <label for="product-required-stock-checkbox"
-                                class="ms-2 text-sm font-medium text-gray-300">This
-                                product
-                                required stock.</label>
+                                product requires stock only and has no consumable item.</label>
                         </div>
                     </div>
 

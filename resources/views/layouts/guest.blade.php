@@ -18,7 +18,7 @@
         <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-300">
             <div>
                 <a href="/dashboard">
-                    <img src="{{ asset('storage/logo/logo.png') }}" alt="Logo"
+                    <img src="{{ asset('storage/logo.png') }}" alt="Logo"
                     class="h-40 w-40">
                 </a>
             </div>

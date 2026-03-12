@@ -20,6 +20,7 @@
     @include('components.toast')
 
     <div class="max-w-7xl mx-auto mt-5 grid grid-cols-1 lg:grid-cols-2 gap-4 mb-10">
+
         <!-- Left: Order Form -->
         <div class="bg-gray-800 p-6 rounded shadow">
             <div class="flex justify-between">
@@ -76,123 +77,95 @@
                     </button>
                 </div>
 
-                <div id="orderButtonWrapper">
-                </div>
+                <div id="orderButtonWrapper"></div>
             </form>
         </div>
 
+        <!-- Right: Stock Info -->
         <div class="grid grid-cols-1 gap-4">
-            <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-                <h1 class="text-white text-2xl font-bold">Product Stock</h1>
 
-                <div class="border-t border-gray-200 my-4"></div>
-
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                Product Name
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                Total Stock Left
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        @forelse ($product_with_stock_list as $product_stock)
-                            <tr
-                                class="bg-gray-800 transition-colors duration-150 {{ $product_stock->required_stock <= 5 ? 'bg-red-900/40' : '' }}">
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                    {{ $product_stock->product_name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                    {{ $product_stock->required_stock }}
-                                    @if ($product_stock->required_stock <= 5)
-                                        <span class="ml-2 text-red-400 text-xs">(Low)</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
+            {{-- Product Stock: only show if product has stock requirement --}}
+            @if ($product_with_stock_list->isNotEmpty())
+                <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
+                    <h1 class="text-white text-2xl font-bold">Product Stock</h1>
+                    <div class="border-t border-gray-200 my-4"></div>
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-900">
                             <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-gray-300">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="h-8 w-8 text-gray-500 mb-2" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        <p class="text-lg font-medium">This product doesn't require stock</p>
-                                    </div>
-                                </td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Product Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Stock Left</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-
-            <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
-                <div class="flex justify-between">
-                    <h1 class="text-white text-2xl font-bold">Consumable Stock</h1>
-
-                    <!-- Pagination -->
-                    <div class="rounded-lg">
-                        {{ $consumable_list->links() }}
-                    </div>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            @foreach ($product_with_stock_list as $product_stock)
+                                <tr class="bg-gray-800 transition-colors duration-150 {{ $product_stock->required_stock <= 5 ? 'bg-red-900/40' : '' }}">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        {{ $product_stock->product_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        {{ $product_stock->required_stock }}
+                                        @if ($product_stock->required_stock <= 5)
+                                            <span class="ml-2 text-red-400 text-xs">(Low)</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
+            @endif
 
-                <div class="border-t border-gray-200 my-4"></div>
-
-
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-900">
-                        <tr>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                Consumable Name
-                            </th>
-                            <th scope="col"
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                Total Stock Left
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-700">
-                        @forelse ($consumable_list as $consumable)
-                            <tr class="bg-gray-800 transition-colors duration-150 {{ $consumable->total_stock_left <= 5 ? 'bg-red-900/40' : '' }}"">
-                                                                        <td class=" px-6 py-4 whitespace-nowrap text-sm
-                                text-white font-medium">
-                                {{ $consumable->consumable_name }}
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                    {{ $consumable->total_stock_left }}
-                                    @if ($consumable->total_stock_left <= 5)
-                                        <span class="ml-2 text-red-400 text-xs">(Low)</span>
-                                    @endif
-                                </td>
-                                </td>
-                            </tr>
-                        @empty
+            {{-- Consumable Stock: only show if product has consumables --}}
+            @if ($consumable_list->isNotEmpty())
+                <div class="bg-gray-800 text-white p-4 rounded-lg shadow">
+                    <div class="flex justify-between items-center">
+                        <h1 class="text-white text-2xl font-bold">Consumable Stock</h1>
+                        <div class="rounded-lg">
+                            {{ $consumable_list->links() }}
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-200 my-4"></div>
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-900">
                             <tr>
-                                <td colspan="4" class="px-6 py-10 text-center text-gray-300">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="h-8 w-8 text-gray-500 mb-2" xmlns="http://www.w3.org/2000/svg"
-                                            viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd"
-                                                d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
-                                                clip-rule="evenodd" />
-                                        </svg>
-                                        <p class="text-lg font-medium">No consumables found</p>
-                                        <p class="text-sm text-gray-400 mt-1">No consumable records available</p>
-                                    </div>
-                                </td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Consumable Name</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Stock Left</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody class="divide-y divide-gray-700">
+                            @foreach ($consumable_list as $consumable)
+                                <tr class="bg-gray-800 transition-colors duration-150 {{ $consumable->total_stock_left <= 5 ? 'bg-red-900/40' : '' }}">
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        {{ $consumable->consumable_name }}
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                        {{ $consumable->total_stock_left }}
+                                        @if ($consumable->total_stock_left <= 5)
+                                            <span class="ml-2 text-red-400 text-xs">(Low)</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+
+            {{-- Show only when BOTH stock and consumables are absent --}}
+            @if ($product_with_stock_list->isEmpty() && $consumable_list->isEmpty())
+                <div class="bg-gray-800 rounded-lg shadow flex flex-col items-center justify-center py-16 px-6 text-center">
+                    <div class="w-14 h-14 rounded-full bg-gray-700 flex items-center justify-center mb-5">
+                        <svg class="w-7 h-7 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none"
+                            viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-.375c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v.375c0 .621.504 1.125 1.125 1.125z" />
+                        </svg>
+                    </div>
+                    <p class="text-white font-semibold text-lg mb-1">No Stock Tracking Required</p>
+                    <p class="text-gray-400 text-sm">This product has no stock or consumable requirements.</p>
+                </div>
+            @endif
+
         </div>
 
         @include('product.orderSummary')
@@ -200,16 +173,6 @@
         <script>
             const quantityInput = document.getElementById('quantity');
             const amountInput = document.getElementById('amount');
-            /*
-            document.querySelector('[onclick*="confirmationModal"]').addEventListener('click', function () {
-                const quantity = quantityInput.value;
-                const amount = amountInput.value;
-
-                document.getElementById('modalQuantity').innerText = quantity || 0;
-                document.getElementById('modalAmount').innerText = amount || 0;
-            });
-            */
-
             const proceedBtn = document.getElementById('proceedBtn');
 
             const productPrice = {{ $product->product_price }};
@@ -219,7 +182,6 @@
             const productConsumables = @json($product->productConsumableNeeded);
             const consumableStocks = @json($consumable_list->items());
 
-            // Make sure the parent wrapper exists
             const buttonWrapper = document.getElementById('orderButtonWrapper');
 
             const warningsContainer = document.createElement('div');
@@ -238,7 +200,7 @@
                 // Check Product Stocks
                 productStocks.forEach(stock => {
                     const required = stock.required_stock;
-                    const needed = quantity; // 1 product = 1 stock
+                    const needed = quantity;
                     if (required < needed) {
                         stockIssues.push(`Insufficient product stock for "${stock.product_name}". Required: ${needed}, Available: ${required}`);
                     }
@@ -254,7 +216,6 @@
                     }
                 });
 
-                // Update warning message
                 if (stockIssues.length > 0) {
                     proceedBtn.disabled = true;
                     proceedBtn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -275,10 +236,8 @@
                 if (selectedPayment) {
                     document.getElementById('payment_method_hidden').value = selectedPayment.value;
                 }
-
                 document.getElementById('orderForm').submit();
             }
-
         </script>
 
         <script src="//unpkg.com/alpinejs" defer></script>

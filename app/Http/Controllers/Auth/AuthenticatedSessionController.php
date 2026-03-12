@@ -20,13 +20,27 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
+        // Validate reCAPTCHA before authenticating
+        $request->validate([
+            'g-recaptcha-response' => ['required', 'captcha'],
+        ], [
+            'g-recaptcha-response.required' => 'Please complete the captcha.',
+            'g-recaptcha-response.captcha'  => 'Captcha verification failed. Please try again.',
+        ]);
+
         $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->route('show.dashboard'); // This route should exist for both guards
-    }
+        $guard = session('guard', 'web');
 
+        // Redirect based on which guard was used
+        if ($guard === 'staff') {
+            return redirect()->intended(route('show.dashboard')); // or a staff-specific route
+        }
+
+        return redirect()->intended(route('show.dashboard'));
+    }
 
     /**
      * Destroy an authenticated session.
@@ -40,6 +54,6 @@ class AuthenticatedSessionController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/'); // or redirect to login
+        return redirect('/');
     }
 }

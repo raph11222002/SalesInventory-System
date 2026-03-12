@@ -8,6 +8,8 @@ use App\Models\ConsumableList;
 use App\Models\ProductWithStockList;
 
 use Illuminate\Http\Request;
+use Illuminate\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
@@ -15,10 +17,15 @@ class DashboardController extends Controller
 {
     public function index(Request $request)
     {
-        if (auth('staff')->check()) {
-            return redirect()->route('record_sales');
+        // Check authentication for web or staff guard
+        if (auth('web')->check()) {
+            $user = auth('web')->user();
+        } elseif (auth('staff')->check()) {
+            return redirect()->route('record_sales'); // staff redirected
+        } else {
+            return redirect()->route('welcome'); // not logged in
         }
-        // Filter logic based on 'filter' query param
+        
         $filter = $request->query('filter', 'today');
 
         $startDate = null;

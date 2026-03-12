@@ -26,7 +26,7 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         $skipConsumables = $request->has('product_consumable_checkbox');
-        $productRequiresStock = $request->has('product_required_stock_checkbox');
+        //$productRequiresStock = $request->has('product_required_stock_checkbox');
 
         // Validate request data
         $validator = Validator::make($request->all(), [
@@ -82,7 +82,8 @@ class ProductController extends Controller
                     }
                 }
 
-                if ($productRequiresStock) {
+                // If product has no consumables for example drinks, add it to ProductWithStockList
+                if ($skipConsumables) {
                     ProductWithStockList::create([
                         'product_id' => $product->id,
                         'product_name' => $product->product_name,
@@ -186,11 +187,23 @@ class ProductController extends Controller
             });
 
         // Step 5: Merge both collections and sort by product_name
-        $mergedProducts = $productsWithStockMapped->merge($productsWithoutStock)->sortBy('product_name')->values();
+        //$mergedProducts = $productsWithStockMapped->merge($productsWithoutStock)->sortBy('product_name')->values();
+
+        $mergedProducts = collect(
+            array_merge(
+                $productsWithStockMapped->toArray(),
+                $productsWithoutStock->toArray()
+            )
+        )
+        ->map(fn($item) => (object) $item)
+        ->sortBy(fn($item) => $item->product_name)
+        ->values();
 
         // Step 6: Manual pagination for merged collection
+        $pageItems = $mergedProducts->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
         $paginated = new LengthAwarePaginator(
-            $mergedProducts->forPage($currentPage, $perPage),
+            $pageItems,
             $mergedProducts->count(),
             $perPage,
             $currentPage,

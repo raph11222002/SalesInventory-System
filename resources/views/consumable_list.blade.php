@@ -9,7 +9,7 @@
 
             <div class="font-medium text-white sm:ms-5">
                 <x-nav-link :href="route('add.consumable')" :active="request()->routeIs('add.consumable')">
-                    {{ __('List Consumable Item') }}
+                    {{ __('Add Consumable Item') }}
                 </x-nav-link>
             </div>
         </div>
@@ -112,7 +112,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-10 text-center text-gray-300">
+                                        <td colspan="5" class="px-6 py-10 text-center text-gray-300">
                                             <div class="flex flex-col items-center justify-center">
                                                 <svg class="h-8 w-8 text-gray-500 mb-2" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 20 20" fill="currentColor">
@@ -120,8 +120,7 @@
                                                         d="M5 3a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2V5a2 2 0 00-2-2H5zm0 2h10v10H5V5z"
                                                         clip-rule="evenodd" />
                                                 </svg>
-                                                <p class="text-lg font-medium">No consumables found</p>
-                                                <p class="text-sm text-gray-400 mt-1">No consumable records available</p>
+                                                <p class="text-lg font-medium text-center">No consumable items found</p>
                                             </div>
                                         </td>
                                     </tr>

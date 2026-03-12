@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'recaptcha' => [
+        'secret' => env('NOCAPTCHA_SECRET'),
+        'sitekey' => env('NOCAPTCHA_SITEKEY'),
+    ],
+
 ];

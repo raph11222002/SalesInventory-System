@@ -5,7 +5,7 @@
             <div class="flex">
                 <!-- Logo -->
                 <div class="shrink-0 flex items-center">
-                    <img src="{{ asset('storage/logo/logo.png') }}" alt="Logo" class="h-16 w-16">
+                    <img src="{{ asset('storage/logo.png') }}" alt="Logo" class="h-16 w-16">
                 </div>
 
                 <!-- Navigation Links -->
@@ -28,7 +28,7 @@
                 @auth('web')
                     <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('add_product')" :active="request()->routeIs('add_product') || request()->routeIs('product.stock.view')">
-                            {{ __('Add Product') }}
+                            {{ __('Product') }}
                         </x-nav-link>
                     </div>
                 @endauth
@@ -51,7 +51,7 @@
                     <div class="text-white hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                         <x-nav-link :href="route('show.register.staff')"
                             :active="request()->routeIs('show.register.staff')">
-                            {{ __('Register Staff') }}
+                            {{ __('Staff') }}
                         </x-nav-link>
                     </div>
                 @endauth

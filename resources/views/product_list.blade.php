@@ -181,7 +181,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="4" class="px-6 py-10 text-center text-gray-300">
+                                        <td colspan="6" class="px-6 py-10 text-center text-gray-300">
                                             <div class="flex flex-col items-center justify-center">
                                                 <svg class="h-8 w-8 text-gray-500 mb-2" xmlns="http://www.w3.org/2000/svg"
                                                     viewBox="0 0 20 20" fill="currentColor">
@@ -190,7 +190,6 @@
                                                         clip-rule="evenodd" />
                                                 </svg>
                                                 <p class="text-lg font-medium">No product yet</p>
-                                                <p class="text-sm text-gray-400 mt-1">No product available</p>
                                             </div>
                                         </td>
                                     </tr>

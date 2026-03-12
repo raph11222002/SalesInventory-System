@@ -30,7 +30,7 @@
                     <div id="consumable-items-container">
                         <div class="flex flex-col md:flex-row items-start md:items-end mb-4 gap-4 consumable-item">
                             <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-300 mb-1">Consumable Name (Size / Amount)
+                                <label class="block text-sm font-medium text-gray-300 mb-1">Consumable Name (Flavor / Size / Amount)
                                     <span class="text-red-500">*</span></label>
                                 <input type="text" name="consumable[${currentIndex}][name]" required autocomplete="off"
                                     value="{{ old('consumable[${currentIndex}][name]') }}" placeholder="Cup (12oz)"

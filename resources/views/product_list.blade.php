@@ -87,7 +87,7 @@
                                                     <span class="ml-2 text-red-400 text-xs">(Low)</span>
                                                 @endif
                                             @else
-                                                <span class="text-gray-400">Product doesn't require stock</span>
+                                                <span class="text-gray-400">Consumables only.</span>
                                             @endif
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">

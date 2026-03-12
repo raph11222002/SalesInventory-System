@@ -61,7 +61,7 @@ class ConsumableController extends Controller
         $consumable_list = ConsumableList::withCount('stockInList')
             ->orderByRaw('total_stock_left < 5 desc') // put low-stock first
             ->orderBy('consumable_name', 'asc') // then sort by name
-            ->paginate(8);
+            ->paginate(20);
 
         return view('consumable_list', compact('consumable_list'));
     }
@@ -75,14 +75,15 @@ class ConsumableController extends Controller
         ]);
 
         $quantity = $request->input('quantity');
-        $stockPrice = $request->input('stock_price');
-        $stockExpenses = $quantity * $stockPrice;
+        $stockPrice = $request->input('stock_price'); // Total expenses for the added stock
+        //$stockExpenses = $quantity * $stockPrice;
+        $totalStockPrice = $stockPrice / $quantity; // Price per added stock
 
         StockInList::create([
             'consumable_id' => $consumableId,
             'quantity_added' => $quantity,
-            'stock_price' => $stockPrice,
-            'stock_expenses' => $stockExpenses,
+            'stock_price' => $totalStockPrice,
+            'stock_expenses' => $stockPrice,
         ]);
 
         // Recalculate total stock

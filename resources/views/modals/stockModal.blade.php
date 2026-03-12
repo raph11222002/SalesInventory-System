@@ -24,7 +24,7 @@
 
                     <input type="number" name="stock_price" id="quantity" min="0" autocomplete="off"
                         class="mt-3 block w-full rounded-md text-black border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 p-2 text-sm"
-                        placeholder="Enter Stock Price" required>
+                        placeholder="Stock Total Expenses" required>
 
                     <div class="mt-6 flex justify-end space-x-3">
                         <button type="button"

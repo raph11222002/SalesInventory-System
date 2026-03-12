@@ -60,7 +60,7 @@
                                 value="{{ old('product_group') }}" placeholder="Noodles">
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-300">Product Name & Size
+                            <label class="block text-sm font-medium text-gray-300">Product Name (Flavor / Size)
                                 <span class="text-red-500">*</span></label>
                             <input type="text" name="product_name" required
                                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"

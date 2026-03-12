@@ -120,7 +120,7 @@
 <div id="paymentMethodModal" class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 hidden overflow-y-auto">
     <div class="flex justify-center min-h-screen px-4 py-8">
         <div class="bg-white rounded-lg p-6 w-full max-w-md">
-            <h3 class="text-lg font-semibold mb-4">Choose Payment Method</h3>
+            <h3 class="text-lg font-semibold mb-4">Confirm Order</h3>
 
             <div class="border-t border-gray-200 my-4"></div>
 

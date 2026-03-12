@@ -249,14 +249,15 @@ class ProductController extends Controller
         ]);
 
         $quantity = $request->input('quantity');
-        $stockPrice = $request->input('stock_price');
-        $stockExpenses = $quantity * $stockPrice;
+        $stockPrice = $request->input('stock_price'); // Total expenses for the added stock
+        //$stockExpenses = $quantity * $stockPrice;
+        $totalStockPrice = $stockPrice / $quantity; // Price per added stock
 
         ProductStockInList::create([
             'product_id' => $productId,
             'quantity_added' => $request->input('quantity'),
-            'stock_price' => $stockPrice,
-            'stock_expenses' => $stockExpenses,
+            'stock_price' => $totalStockPrice,
+            'stock_expenses' => $stockPrice,
         ]);
 
         // Recalculate total stock

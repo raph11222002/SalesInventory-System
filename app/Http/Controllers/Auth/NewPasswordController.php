@@ -36,16 +36,24 @@ class NewPasswordController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Determine which broker to use based on whether email belongs to staff
+        $isStaff = \App\Models\Staff::where('email', $request->email)->exists();
+        $broker = $isStaff ? Password::broker('staffs') : Password::broker();
+
         // Here we will attempt to reset the user's password. If it is successful we
         // will update the password on an actual user model and persist it to the
         // database. Otherwise we will parse the error and return the response.
-        $status = Password::reset(
+        $status = $broker->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
-            function (User $user) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($request->password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+            function ($user) use ($request, $isStaff) {
+                $fill = ['password' => Hash::make($request->password)];
+
+                // Only regenerate remember_token for web users, not staff
+                if (!$isStaff) {
+                    $fill['remember_token'] = Str::random(60);
+                }
+
+                $user->forceFill($fill)->save();
 
                 event(new PasswordReset($user));
             }
@@ -55,8 +63,8 @@ class NewPasswordController extends Controller
         // the application's home authenticated view. If there is an error we can
         // redirect them back to where they came from with their error message.
         return $status == Password::PASSWORD_RESET
-                    ? redirect()->route('password.reset.success')->with('status', __($status))
-                    : back()->withInput($request->only('email'))
-                        ->withErrors(['email' => __($status)]);
+            ? redirect()->route('password.reset.success')->with('status', __($status))
+            : back()->withInput($request->only('email'))
+                ->withErrors(['email' => __($status)]);
     }
 }

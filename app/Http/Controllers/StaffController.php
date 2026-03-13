@@ -19,7 +19,7 @@ class StaffController extends Controller
      */
     public function showStaffRegister(): View
     {
-        $staffs = Staff::where('is_active', 1)->get();
+        $staffs = Staff::all();
 
         return view('auth.register_staff', compact('staffs'));
     }
@@ -56,14 +56,17 @@ class StaffController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $staff = \App\Models\Staff::where('email', $request->email)->first();
+
+        if ($staff && !$staff->is_active) {
+            return back()->withErrors([
+                'email' => 'This account has been deactivated. Please contact your administrator.',
+            ])->onlyInput('email');
+        }
+
         if (Auth::guard('staff')->attempt($credentials)) {
             $request->session()->regenerate();
-
-            logger('Login success:', [Auth::guard('staff')->user()]);
-
             return redirect()->route('record_sales');
-        } else {
-            logger('Login failed for', $credentials);
         }
 
         return back()->withErrors([
@@ -83,7 +86,9 @@ class StaffController extends Controller
         $user->is_active = $request->input('is_active', 0);
         $user->save();
 
-        return redirect()->back()->with('status', 'Account deactivated successfully.');
+        $message = $user->is_active ? 'Account activated successfully.' : 'Account deactivated successfully.';
+
+        return redirect()->back()->with('status', $message);
     }
 
 }

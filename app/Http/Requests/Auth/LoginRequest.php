@@ -36,6 +36,15 @@ class LoginRequest extends FormRequest
         $remember = $this->boolean('remember');
         $authenticated = false;
 
+        // Check if staff account is deactivated
+        $staff = \App\Models\Staff::where('email', $this->email)->first();
+
+        if ($staff && !$staff->is_active) {
+            throw ValidationException::withMessages([
+                'email' => 'This account has been deactivated. Please contact your administrator.',
+            ]);
+        }
+
         if (Auth::guard('web')->attempt($credentials, $remember)) {
             session(['guard' => 'web']);
             $authenticated = true;

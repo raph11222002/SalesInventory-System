@@ -43,8 +43,6 @@ Route::post('/login-staff', [App\Http\Controllers\StaffController::class, 'login
     ->middleware(['guest:staff'])->name('staff.login');
 
 Route::middleware(['auth:web'])->group(function () {
-
-    // Add these routes to your routes/web.php file
     Route::get('/add-product', [App\Http\Controllers\ProductController::class, 'showAddProduct'])->name('add_product');
     Route::get('/product-list', [App\Http\Controllers\ProductController::class, 'showProductWithStock'])->name('product.stock.view');
     Route::post('/product-stock-list/{id}/add-stock', [App\Http\Controllers\ProductController::class, 'productAddStock'])->name('product.addStock');

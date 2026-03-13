@@ -160,17 +160,39 @@
                     </table>
                 </div>
 
+                <!-- Customer Payment Input -->
+                <div class="mb-4" id="cashPaymentSection">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Customer Payment (₱)</label>
+                    <input type="number" id="customerPaymentInput" name="customer_payment"
+                        min="0" step="0.01" placeholder="Enter amount given"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    <p id="paymentError" class="text-red-500 text-xs mt-1 hidden">
+                        Amount must be equal to or greater than the total.
+                    </p>
+                </div>
+
+                <!-- Change Display -->
+                <div class="mb-4 p-3 bg-gray-100 rounded" id="changeDisplay" style="display:none;">
+                    <div class="flex justify-between text-sm font-medium text-gray-700">
+                        <span>Total Bill:</span>
+                        <span>₱<span id="displayTotal">0.00</span></span>
+                    </div>
+                    <div class="flex justify-between text-sm font-medium text-green-700 mt-1">
+                        <span>Change:</span>
+                        <span>₱<span id="changeAmount">0.00</span></span>
+                    </div>
+                    <input type="hidden" name="change_amount" id="changeAmountInput" value="0">
+                </div>
+
                 <!-- Payment Method Toggle -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
                     <div class="flex space-x-4">
-                        <!-- Cash Option -->
                         <label class="flex items-center">
                             <input type="radio" id="cash" name="payment_method" value="Cash"
                                 class="form-radio h-4 w-4 text-blue-500" checked>
                             <span class="ml-2">Cash</span>
                         </label>
-                        <!-- Gcash Option -->
                         <label class="flex items-center">
                             <input type="radio" id="gcash" name="payment_method" value="Gcash"
                                 class="form-radio h-4 w-4 text-blue-500">
@@ -183,8 +205,11 @@
                     <button type="button"
                         onclick="document.getElementById('paymentMethodModal').classList.add('hidden')"
                         class="px-4 py-2 bg-gray-400 hover:bg-gray-500 rounded">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-green-500 hover:bg-green-400 rounded text-white">Complete
-                        Order</button>
+                    <button type="submit" id="completeOrderBtn"
+                        class="px-4 py-2 bg-green-500 hover:bg-green-400 rounded text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                        disabled>
+                        Complete Order
+                    </button>
                 </div>
             </form>
         </div>
@@ -194,6 +219,65 @@
 <script>
     // Toggle order summary visibility
     document.addEventListener('DOMContentLoaded', function () {
+        const totalAmount = {{ session('totalAmount', 0) }};
+        const customerPaymentInput = document.getElementById('customerPaymentInput');
+        const changeAmountInput = document.getElementById('changeAmountInput');
+        const changeDisplay = document.getElementById('changeDisplay');
+        const changeAmountSpan = document.getElementById('changeAmount');
+        const displayTotal = document.getElementById('displayTotal');
+        const completeOrderBtn = document.getElementById('completeOrderBtn');
+        const paymentError = document.getElementById('paymentError');
+        const cashPaymentSection = document.getElementById('cashPaymentSection');
+        const changeSection = document.getElementById('changeDisplay');
+
+        displayTotal.textContent = totalAmount.toFixed(2);
+
+        /* Show/hide cash input based on payment method
+        document.querySelectorAll('input[name="payment_method"]').forEach(function (radio) {
+            radio.addEventListener('change', function () {
+                if (this.value === 'Cash') {
+                    cashPaymentSection.style.display = 'block';
+                    validatePayment(); // re-check on switch
+                } else {
+                    // Gcash: no cash input needed, enable button directly
+                    cashPaymentSection.style.display = 'none';
+                    changeSection.style.display = 'none';
+                    paymentError.classList.add('hidden');
+                    completeOrderBtn.disabled = false;
+                    customerPaymentInput.value = '';
+                    changeAmountInput.value = 0;
+                }
+            });
+        }); */
+
+        function validatePayment() {
+            const entered = parseFloat(customerPaymentInput.value);
+
+            if (isNaN(entered) || entered === '' || customerPaymentInput.value.trim() === '') {
+                completeOrderBtn.disabled = true;
+                changeSection.style.display = 'none';
+                paymentError.classList.add('hidden');
+                return;
+            }
+
+            if (entered < totalAmount) {
+                completeOrderBtn.disabled = true;
+                changeSection.style.display = 'none';
+                paymentError.classList.remove('hidden');
+                return;
+            }
+
+            // Valid payment
+            paymentError.classList.add('hidden');
+            const change = entered - totalAmount;
+            changeAmountSpan.textContent = change.toFixed(2);
+            changeAmountInput.value = change.toFixed(2);
+            changeSection.style.display = 'block';
+            completeOrderBtn.disabled = false;
+        }
+
+        customerPaymentInput.addEventListener('input', validatePayment);
+
         const orderSummary = document.getElementById('orderSummary');
         const orderSummaryContent = document.getElementById('orderSummaryContent');
         const toggleIcon = document.getElementById('toggleIcon');

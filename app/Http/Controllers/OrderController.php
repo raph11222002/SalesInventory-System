@@ -323,6 +323,8 @@ class OrderController extends Controller
     public function confirmOrder(Request $request)
     {
         $request->validate([
+            'customer_payment' => 'required|numeric|min:0',
+            'change_amount'    => 'required|numeric|min:0',
             'payment_method' => 'required|string|in:Cash,Gcash',
         ]);
 
@@ -334,10 +336,18 @@ class OrderController extends Controller
             return back()->with('error', 'No items in order');
         }
 
+        // Extra server-side check: customer_payment must cover the total
+        if ($request->input('payment_method') === 'Cash' &&
+            $request->input('customer_payment') < $totalAmount) {
+            return back()->with('error', 'Customer payment is less than the total amount.');
+        }
+
         // Create order record
         $order = Orders::create([
             'staff_id' => Auth::guard('staff')->id(),
             'total_amount' => $totalAmount,
+            'customer_payment' => $request->input('customer_payment'),
+            'change_amount'    => $request->input('change_amount'),
             'payment_method' => $request->input('payment_method'),
             'created_at' => now(),
             'updated_at' => now(),

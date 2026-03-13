@@ -106,6 +106,12 @@ return [
             'expire' => 1,
             'throttle' => 60,
         ],
+        'staffs' => [
+            'provider' => 'staff',
+            'table' => env('AUTH_PASSWORD_RESET_TOKEN_TABLE', 'password_reset_tokens'),
+            'expire' => 1,
+            'throttle' => 60,
+        ],
     ],
 
     /*

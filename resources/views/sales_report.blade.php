@@ -121,11 +121,19 @@
                                                 </th>
                                                 <th
                                                     class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                    Customer Payment
+                                                </th>
+                                                <th
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                                    Change
+                                                </th>
+                                                <th
+                                                    class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
                                                     Payment Method
                                                 </th>
                                                 <th
                                                     class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                                                    Time Ordered
+                                                    Time
                                                 </th>
                                                 <th
                                                     class="px-6 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">
@@ -144,6 +152,12 @@
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                                         ₱{{ number_format($order->total_amount, 2) }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                                        ₱{{ number_format($order->customer_payment, 2) }}
+                                                    </td>
+                                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
+                                                        ₱{{ number_format($order->change_amount, 2) }}
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
                                                         {{ $order->payment_method ?? 'N/A' }}

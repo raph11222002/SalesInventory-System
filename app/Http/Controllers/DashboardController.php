@@ -21,7 +21,7 @@ class DashboardController extends Controller
         if (auth('web')->check()) {
             $user = auth('web')->user();
         } elseif (auth('staff')->check()) {
-            return redirect()->route('record_sales'); // staff redirected
+            return redirect()->route('record_sales');
         } else {
             return redirect()->route('welcome'); // not logged in
         }

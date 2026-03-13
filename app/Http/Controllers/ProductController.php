@@ -13,6 +13,7 @@ use App\Models\ProductWithStockList;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class ProductController extends Controller
 {
@@ -47,7 +48,6 @@ class ProductController extends Controller
         }
 
         try {
-            // Begin transaction to ensure all records are created or none
             DB::beginTransaction();
 
             // Handle image upload
@@ -93,6 +93,12 @@ class ProductController extends Controller
                 }
 
                 DB::commit();
+
+                Log::info('Product added', [
+                    'product_name' => $product->product_name,
+                    'user_id' => Auth::id()
+                ]);
+
                 return redirect()->route('add_product')->with('success', 'Product added successfully!');
             }
         } catch (\Exception $e) {
@@ -106,13 +112,10 @@ class ProductController extends Controller
 
         if (Auth::guard('web')->check()) {
             $data['user'] = Auth::guard('web')->user();
-            // handle web user
         } elseif (Auth::guard('staff')->check()) {
             $data['staff'] = Auth::guard('staff')->user();
-            // handle staff user
         } else {
-            // optional: redirect to login or abort
-            return redirect()->route('welcome'); // or custom logic
+            return redirect()->route('welcome');
         }
 
         $products = Product::with('productConsumableNeeded')

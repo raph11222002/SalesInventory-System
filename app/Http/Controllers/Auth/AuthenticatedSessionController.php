@@ -28,6 +28,14 @@ class AuthenticatedSessionController extends Controller
             'g-recaptcha-response.captcha'  => 'Captcha verification failed. Please try again.',
         ]);
 
+        $user = \App\Models\User::where('email', $request->email)->first();
+
+        if ($user && isset($user->is_active) && !$user->is_active) {
+            return back()->withErrors([
+                'email' => 'This account has been deactivated. Please contact your administrator.',
+            ])->onlyInput('email');
+        }
+
         $request->authenticate();
 
         $request->session()->regenerate();

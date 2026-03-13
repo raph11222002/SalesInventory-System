@@ -8,11 +8,10 @@
     @include('components.toast')
 
     <div class="max-w-7xl mx-auto grid grid-cols-3 gap-4 mt-10">
-        <div class=" px-6 py-4 bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
+        <div class="px-6 py-4 bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
             <form method="POST" action="{{ route('admin.register.staff') }}">
                 @csrf
 
-                <!-- Name -->
                 <div>
                     <x-input-label for="name" :value="__('Name')" />
                     <x-text-input id="name" class="block mt-1 w-full" type="text" name="name" :value="old('name')"
@@ -20,7 +19,6 @@
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
 
-                <!-- Email Address -->
                 <div class="mt-4">
                     <x-input-label for="email" :value="__('Email')" />
                     <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" required
@@ -28,23 +26,17 @@
                     <x-input-error :messages="$errors->get('email')" class="mt-2" />
                 </div>
 
-                <!-- Password -->
                 <div class="mt-4">
                     <x-input-label for="password" :value="__('Password')" />
-
                     <x-text-input id="password" class="block mt-1 w-full" type="password" name="password" required
                         autocomplete="new-password" />
-
                     <x-input-error :messages="$errors->get('password')" class="mt-2" />
                 </div>
 
-                <!-- Confirm Password -->
                 <div class="mt-4">
                     <x-input-label for="password_confirmation" :value="__('Confirm Password')" />
-
                     <x-text-input id="password_confirmation" class="block mt-1 w-full" type="password"
                         name="password_confirmation" required autocomplete="new-password" />
-
                     <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
                 </div>
 
@@ -64,53 +56,61 @@
             <table class="min-w-full divide-y divide-gray-700">
                 <thead>
                     <tr>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Staff ID
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Staff Name
-                        </th>
-                        <th scope="col"
-                            class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                            Email
-                        </th>
-                        <th scope="col" class="text-center px-6 py-3 text-xs font-medium text-gray-300 uppercase">
-                            Actions
-                        </th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Staff ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Staff Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="text-center px-6 py-3 text-xs font-medium text-gray-300 uppercase">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-700">
                     @forelse($staffs as $staff)
-                        <tr class="hover:bg-gray-800 transition-colors duration-150">
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                {{ $staff->id }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                {{ $staff->name }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">
-                                {{ $staff->email }}
+                        <tr class="hover:bg-gray-700 transition-colors duration-150 {{ $staff->is_active ? '' : 'opacity-40' }}">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">{{ $staff->id }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">{{ $staff->name }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-white font-medium">{{ $staff->email }}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                @if($staff->is_active)
+                                    <span class="px-2 py-1 text-xs rounded-full bg-green-900 text-green-300">Active</span>
+                                @else
+                                    <span class="px-2 py-1 text-xs rounded-full bg-red-900 text-red-300">Inactive</span>
+                                @endif
                             </td>
                             <td class="text-center text-sm text-white font-medium">
-                                <button type="button" onclick="openConfirmModal({{ $staff->id }})"
-                                    class="p-0 m-0 bg-transparent border-none hover:opacity-75">
-                                    <img src="{{ asset('storage/logo/deactivate_account.png') }}" alt="Deactivate"
-                                        class="w-6 h-6">
-                                </button>
+                                @if($staff->is_active)
+                                    {{-- Deactivate button --}}
+                                    <button type="button" onclick="openConfirmModal({{ $staff->id }}, 'deactivate')"
+                                        class="p-0 m-0 bg-transparent border-none hover:opacity-75" title="Deactivate">
+                                        <img src="{{ asset('storage/logo/deactivate_account.png') }}" alt="Deactivate" class="w-6 h-6">
+                                    </button>
+                                @else
+                                    {{-- Activate button --}}
+                                    <button type="button" onclick="openConfirmModal({{ $staff->id }}, 'activate')"
+                                        class="px-2 py-1 text-xs bg-green-600 hover:bg-green-700 text-white rounded transition" title="Activate">
+                                        Activate
+                                    </button>
+                                @endif
 
+                                {{-- Deactivate form --}}
                                 <form id="deactivateForm-{{ $staff->id }}" method="POST"
-                                    action="{{ route('staff.deactivate', $staff->id) }}">
+                                    action="{{ route('staff.deactivate', $staff->id) }}" class="hidden">
                                     @csrf
                                     @method('PATCH')
                                     <input type="hidden" name="is_active" value="0">
+                                </form>
+
+                                {{-- Activate form --}}
+                                <form id="activateForm-{{ $staff->id }}" method="POST"
+                                    action="{{ route('staff.deactivate', $staff->id) }}" class="hidden">
+                                    @csrf
+                                    @method('PATCH')
+                                    <input type="hidden" name="is_active" value="1">
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="px-6 py-4 text-center text-gray-400">No staff found.</td>
+                            <td colspan="5" class="px-6 py-4 text-center text-gray-400">No staff found.</td>
                         </tr>
                     @endforelse
                 </tbody>
@@ -118,16 +118,14 @@
 
             <!-- Confirmation Modal -->
             <div id="confirmModal" class="items-center justify-center z-50 fixed inset-0 bg-black bg-opacity-50 hidden">
-                <div>
-                    <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
-                        <h2 class="text-lg font-semibold text-gray-800 mb-4">Confirm Deactivation</h2>
-                        <p class="text-gray-700 mb-6">Are you sure you want to deactivate this account?</p>
-                        <div class="flex justify-end space-x-3">
-                            <button onclick="closeConfirmModal()"
-                                class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
-                            <button id="confirmDeactivateBtn"
-                                class="px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700">Deactivate</button>
-                        </div>
+                <div class="bg-white rounded-lg shadow-lg max-w-sm w-full p-6">
+                    <h2 class="text-lg font-semibold text-gray-800 mb-4" id="modalTitle">Confirm Action</h2>
+                    <p class="text-gray-700 mb-6" id="modalMessage">Are you sure?</p>
+                    <div class="flex justify-end space-x-3">
+                        <button onclick="closeConfirmModal()"
+                            class="px-4 py-2 text-sm text-gray-700 bg-gray-200 rounded hover:bg-gray-300">Cancel</button>
+                        <button id="confirmDeactivateBtn"
+                            class="px-4 py-2 text-sm text-white rounded hover:opacity-90">Confirm</button>
                     </div>
                 </div>
             </div>
@@ -136,24 +134,47 @@
 
     <script>
         let selectedId = null;
+        let selectedAction = null;
 
-        function openConfirmModal(stockId) {
-            selectedId = stockId;
+        function openConfirmModal(staffId, action) {
+            selectedId = staffId;
+            selectedAction = action;
+
             const modal = document.getElementById('confirmModal');
+            const btn = document.getElementById('confirmDeactivateBtn');
+            const title = document.getElementById('modalTitle');
+            const message = document.getElementById('modalMessage');
+
+            if (action === 'deactivate') {
+                title.textContent = 'Confirm Deactivation';
+                message.textContent = 'Are you sure you want to deactivate this account?';
+                btn.className = 'px-4 py-2 text-sm text-white bg-red-600 rounded hover:bg-red-700';
+                btn.textContent = 'Deactivate';
+            } else {
+                title.textContent = 'Confirm Activation';
+                message.textContent = 'Are you sure you want to activate this account?';
+                btn.className = 'px-4 py-2 text-sm text-white bg-green-600 rounded hover:bg-green-700';
+                btn.textContent = 'Activate';
+            }
+
             modal.classList.remove('hidden');
             modal.classList.add('flex');
         }
 
         function closeConfirmModal() {
             selectedId = null;
+            selectedAction = null;
             const modal = document.getElementById('confirmModal');
             modal.classList.remove('flex');
             modal.classList.add('hidden');
         }
 
-        document.getElementById('confirmBtn').addEventListener('click', function () {
-            if (selectedId) {
-                document.getElementById('removeForm-' + selectedId).submit();
+        document.getElementById('confirmDeactivateBtn').addEventListener('click', function () {
+            if (selectedId && selectedAction) {
+                const formId = selectedAction === 'deactivate'
+                    ? 'deactivateForm-' + selectedId
+                    : 'activateForm-' + selectedId;
+                document.getElementById(formId).submit();
             }
         });
     </script>
